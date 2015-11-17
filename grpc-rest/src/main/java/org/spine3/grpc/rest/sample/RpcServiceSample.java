@@ -41,7 +41,7 @@ public class RpcServiceSample extends AbstractRpcService {
     }
 
     @Override
-    protected RpcCallHandler getRpcCallHandler(String rpcCallType) {
-        return handlers.get(rpcCallType);
+    protected RpcCallHandler getRpcCallHandler(String method) {
+        return handlers.get(method);
     }
 }
