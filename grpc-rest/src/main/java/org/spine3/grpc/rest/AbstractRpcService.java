@@ -39,30 +39,30 @@ import java.io.IOException;
  */
 public abstract class AbstractRpcService extends HttpServlet {
 
-    public static final String RPC_CALL_TYPE_ATTRIBUTE = "rpc_call_type";
-    public static final String RPC_CALL_ARGUMENT_ATTRIBUTE = "rpc_call_argument";
+    public static final String RPC_METHOD_ATTRIBUTE = "rpc_method_type";
+    public static final String RPC_METHOD_ARGUMENT_ATTRIBUTE = "rpc_method_argument";
     private static final long serialVersionUID = 2375951049753200060L;
 
     @SuppressWarnings("RefusedBequest")
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final String rpcCallType = (String) req.getAttribute(RPC_CALL_TYPE_ATTRIBUTE);
-        final Message rpcCallArgument = (Message) req.getAttribute(RPC_CALL_ARGUMENT_ATTRIBUTE);
+        final String rpcMethod = (String) req.getAttribute(RPC_METHOD_ATTRIBUTE);
+        final Message rpcMethodArgument = (Message) req.getAttribute(RPC_METHOD_ARGUMENT_ATTRIBUTE);
 
-        if (rpcCallType == null || rpcCallArgument == null) {
-            throw new IllegalArgumentException("Invalid RPC call.");
+        if (rpcMethod == null || rpcMethodArgument == null) {
+            throw new IllegalArgumentException("Invalid RPC method call.");
         }
 
-        final RpcCallHandler handler = getRpcCallHandler(rpcCallType);
+        final RpcCallHandler handler = getRpcCallHandler(rpcMethod);
 
         if (handler == null) {
-            throw new IllegalArgumentException("Unknown RPC call.");
+            throw new IllegalArgumentException("Unknown RPC method call.");
         }
 
-        final Message rpcCallResult = handler.handle(rpcCallArgument);
+        final Message rpcMethodCallResult = handler.handle(rpcMethodArgument);
 
         //todo:2015-11-13:mikhail.mikhaylov: write result into response.
     }
 
-    protected abstract RpcCallHandler getRpcCallHandler(String rpcCallType);
+    protected abstract RpcCallHandler getRpcCallHandler(String method);
 }
