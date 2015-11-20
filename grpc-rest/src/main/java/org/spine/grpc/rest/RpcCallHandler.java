@@ -17,20 +17,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.grpc.rest.sample;
-
-//<generated imports>
+package org.spine.grpc.rest;
 
 import com.google.protobuf.Message;
-import org.spine3.grpc.rest.RpcCallHandler;
 
 /**
- * Sample class which shows the desired result of a code generation tool.
+ * An interface which describes a single RPC endpoint for an RPC service.
+ *
+ * @param <P> RPC call param
+ * @param <R> RPC call result
  */
-//<generated name>
-public class RpcCallHandlerSample implements RpcCallHandler<Message, Message> {
-    @Override
-    public Message handle(Message requestMessage) {
-        throw new IllegalStateException("Please implement this handler first.");
-    }
+public interface RpcCallHandler<P extends Message, R extends Message> {
+    R handle(P requestMessage);
 }

@@ -1,0 +1,44 @@
+description = ''
+
+buildscript {
+    dependencies {
+        classpath "org.spine3.tools:proto-lookup-plugin:1.0"
+    }
+}
+
+repositories {
+    maven {
+        url = project.MAVEN_REPOSITORY_URL
+    }
+}
+
+apply plugin: 'org.spine3.tools.protolookup'
+
+dependencies {
+    compile project(":grpc-rest")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += ["$projectDir/generated/main/spineGrpc"]
+        }
+    }
+}
+
+protobuf {
+    plugins {
+        spineGrpc {
+            artifact = 'org.spine3.tools:grpc-proto-plugin:1.0:exe'
+        }
+    }
+    generateProtoTasks {
+        all().each { final task ->
+            task.plugins {
+                spineGrpc {
+
+                }
+            }
+        }
+    }
+}
