@@ -18,10 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides storages based on Google Datastore.
- */
-@ParametersAreNonnullByDefault
-package org.spine3.server.storage.datastore;
+package org.spine3.eventbus;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.junit.Test;
+
+import java.util.concurrent.Executors;
+
+import static org.junit.Assert.assertNotNull;
+
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class EventBusShould {
+
+    @Test
+    public void create_direct_executor_instance() {
+        assertNotNull(EventBus.newInstance());
+    }
+
+    @Test
+    public void create_instance_with_executor() {
+        assertNotNull(EventBus.newInstance(Executors.newSingleThreadExecutor()));
+    }
+}
