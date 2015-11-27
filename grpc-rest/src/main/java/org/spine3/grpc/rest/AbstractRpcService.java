@@ -20,12 +20,16 @@
 package org.spine3.grpc.rest;
 
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Describes RPC service REST endpoint.
@@ -39,6 +43,7 @@ import java.io.IOException;
  */
 public abstract class AbstractRpcService extends HttpServlet {
 
+    public static final String PROTO_MIME_TYPE = "application/x-protobuf";
     public static final String RPC_METHOD_ATTRIBUTE = "rpc_method_type";
     public static final String RPC_METHOD_ARGUMENT_ATTRIBUTE = "rpc_method_argument";
     private static final long serialVersionUID = 2375951049753200060L;
@@ -59,10 +64,40 @@ public abstract class AbstractRpcService extends HttpServlet {
             throw new IllegalArgumentException("Unknown RPC method call.");
         }
 
+        @SuppressWarnings("unchecked")
         final Message rpcMethodCallResult = handler.handle(rpcMethodArgument);
 
-        //todo:2015-11-13:mikhail.mikhaylov: write result into response.
+        write(resp, rpcMethodCallResult);
     }
 
     protected abstract RpcCallHandler getRpcCallHandler(String method);
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private void write(ServletResponse response, Message message) {
+        final byte[] serializedMsg = message.toByteArray();
+
+        response.setContentType(PROTO_MIME_TYPE);
+        response.setCharacterEncoding(null);
+
+        final OutputStream outputstream;
+        try {
+            outputstream = response.getOutputStream();
+            outputstream.write(serializedMsg);
+
+            outputstream.close();
+        } catch (IOException e) {
+            getLog().error(e.getMessage(), e);
+        }
+    }
+
+    protected Logger getLog() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(AbstractRpcService.class);
+    }
 }
