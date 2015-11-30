@@ -27,18 +27,18 @@ sourceSets {
 }
 
 protobuf {
-    plugins {
-        spineGrpc {
-            artifact = 'org.spine3.tools:grpc-proto-plugin:1.0:exe'
-        }
-    }
-    generateProtoTasks {
-        all().each { final task ->
-            task.plugins {
-                spineGrpc {
-
-                }
-            }
-        }
-    }
+//    plugins {
+//        spineGrpc {
+//            artifact = 'org.spine3.tools:grpc-proto-plugin:1.0:exe'
+//        }
+//    }
+//    generateProtoTasks {
+//        all().each { final task ->
+//            task.plugins {
+//                spineGrpc {
+//
+//                }
+//            }
+//        }
+//    }
 }
