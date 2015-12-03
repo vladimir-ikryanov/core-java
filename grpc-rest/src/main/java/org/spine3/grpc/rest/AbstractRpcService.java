@@ -19,9 +19,11 @@
  */
 package org.spine3.grpc.rest;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.protobuf.Messages;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
@@ -52,7 +54,9 @@ public abstract class AbstractRpcService extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final String rpcMethod = (String) req.getAttribute(RPC_METHOD_ATTRIBUTE);
-        final Message rpcMethodArgument = (Message) req.getAttribute(RPC_METHOD_ARGUMENT_ATTRIBUTE);
+        final byte[] rpcMethodArgument = (byte[]) req.getAttribute(RPC_METHOD_ARGUMENT_ATTRIBUTE);
+
+        final Message messageArgument = Messages.fromAny(Any.parseFrom(rpcMethodArgument));
 
         if (rpcMethod == null || rpcMethodArgument == null) {
             throw new IllegalArgumentException("Invalid RPC method call.");
@@ -65,7 +69,7 @@ public abstract class AbstractRpcService extends HttpServlet {
         }
 
         @SuppressWarnings("unchecked")
-        final Message rpcMethodCallResult = handler.handle(rpcMethodArgument);
+        final Message rpcMethodCallResult = handler.handle(messageArgument);
 
         write(resp, rpcMethodCallResult);
     }
