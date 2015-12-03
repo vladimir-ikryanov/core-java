@@ -30,8 +30,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Base64;
 
 /**
  * Describes RPC service REST endpoint.
@@ -48,15 +51,15 @@ public abstract class AbstractRpcService extends HttpServlet {
     public static final String PROTO_MIME_TYPE = "application/x-protobuf";
     public static final String RPC_METHOD_ATTRIBUTE = "rpc_method_type";
     public static final String RPC_METHOD_ARGUMENT_ATTRIBUTE = "rpc_method_argument";
+
+    private static final String PROTOBUF_PARSE_FROM_METHOD_NAME = "parseFrom";
     private static final long serialVersionUID = 2375951049753200060L;
 
-    @SuppressWarnings("RefusedBequest")
+    @SuppressWarnings({"RefusedBequest", "unchecked", "PrimitiveArrayArgumentToVariableArgMethod"})
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final String rpcMethod = (String) req.getAttribute(RPC_METHOD_ATTRIBUTE);
-        final byte[] rpcMethodArgument = (byte[]) req.getAttribute(RPC_METHOD_ARGUMENT_ATTRIBUTE);
-
-        final Message messageArgument = Messages.fromAny(Any.parseFrom(rpcMethodArgument));
+        final String rpcMethod = req.getParameter(RPC_METHOD_ATTRIBUTE);
+        final String rpcMethodArgument = req.getParameter(RPC_METHOD_ARGUMENT_ATTRIBUTE);
 
         if (rpcMethod == null || rpcMethodArgument == null) {
             throw new IllegalArgumentException("Invalid RPC method call.");
@@ -66,6 +69,17 @@ public abstract class AbstractRpcService extends HttpServlet {
 
         if (handler == null) {
             throw new IllegalArgumentException("Unknown RPC method call.");
+        }
+
+        final byte[] bytes = DatatypeConverter.parseBase64Binary(rpcMethodArgument);
+
+        Message messageArgument = null;
+        try {
+            messageArgument = (Message) handler.getParameterClass()
+                    .getMethod(PROTOBUF_PARSE_FROM_METHOD_NAME, byte[].class).invoke(null, bytes);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            // This should never happen
+            e.printStackTrace();
         }
 
         @SuppressWarnings("unchecked")

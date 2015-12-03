@@ -29,4 +29,6 @@ import com.google.protobuf.Message;
  */
 public interface RpcCallHandler<P extends Message, R extends Message> {
     R handle(P requestMessage);
+
+    Class<P> getParameterClass();
 }
