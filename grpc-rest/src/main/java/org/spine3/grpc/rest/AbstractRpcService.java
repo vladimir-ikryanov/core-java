@@ -19,11 +19,9 @@
  */
 package org.spine3.grpc.rest;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.protobuf.Messages;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
@@ -33,8 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Base64;
 
 /**
  * Describes RPC service REST endpoint.
@@ -94,15 +92,18 @@ public abstract class AbstractRpcService extends HttpServlet {
     private void write(ServletResponse response, Message message) {
         final byte[] serializedMsg = message.toByteArray();
 
+        final String base64 = DatatypeConverter.printBase64Binary(serializedMsg);
+
         response.setContentType(PROTO_MIME_TYPE);
         response.setCharacterEncoding(null);
 
-        final OutputStream outputstream;
+        final PrintWriter writer;
         try {
-            outputstream = response.getOutputStream();
-            outputstream.write(serializedMsg);
+            writer = response.getWriter();
+            writer.write(base64);
 
-            outputstream.close();
+            writer.flush();
+            writer.close();
         } catch (IOException e) {
             getLog().error(e.getMessage(), e);
         }
