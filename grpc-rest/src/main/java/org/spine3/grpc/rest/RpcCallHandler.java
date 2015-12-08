@@ -28,7 +28,19 @@ import com.google.protobuf.Message;
  * @param <R> RPC call result
  */
 public interface RpcCallHandler<P extends Message, R extends Message> {
+
+    /**
+     * Rpc Method Handler itself. Should be implemented manually.
+     *
+     * @param requestMessage Rpc Method Argument
+     * @return Rpc Method Result
+     */
     R handle(P requestMessage);
 
+    /**
+     * Returns Rpc Method Parameter class. Is implemented automatically with the generator.
+     *
+     * @return Class type instance
+     */
     Class<P> getParameterClass();
 }
