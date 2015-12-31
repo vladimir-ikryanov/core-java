@@ -26,17 +26,19 @@ public class ClientServiceGrpc {
 
     public interface Api {
         // rpc Connect(ClientRequest) returns (Connection);
-        Connection connect(SimpleClientRequest request);
+        SimpleConnection connect(SimpleClientRequest request);
 
         // rpc Post(CommandRequest) returns (CommandResponse);
         // rpc Post(SimpleCommandRequest) returns (SimpleCommandResponse);
         SimpleCommandResponse post(SimpleCommandRequest request);
 
         // rpc GetEvents(Connection) returns (stream spine.base.EventRecord);
-        void getEvents(Connection request, StreamObserver<SimpleEventRecord> resultObserver);
+        void getEvents(SimpleConnection request, StreamObserver<SimpleEventRecord> resultObserver);
     }
 
     public abstract static class WebServlet extends AbstractServiceWebServlet implements Api {
+
+        private static final long serialVersionUID = 5585993931021319063L;
 
         private Map<String, RpcCallHandler> handlers = new HashMap<String, RpcCallHandler>() {{
             put("Connect", new ConnectHandler(WebServlet.this));
@@ -49,7 +51,7 @@ public class ClientServiceGrpc {
             return handlers.get(method);
         }
 
-        private static class ConnectHandler implements RpcCallHandler<SimpleClientRequest, Connection> {
+        private static class ConnectHandler implements RpcCallHandler<SimpleClientRequest, SimpleConnection> {
 
             private final Api serviceImpl;
 
@@ -58,7 +60,7 @@ public class ClientServiceGrpc {
             }
 
             @Override
-            public Connection handle(SimpleClientRequest requestMessage) {
+            public SimpleConnection handle(SimpleClientRequest requestMessage) {
                 return serviceImpl.connect(requestMessage);
             }
 
@@ -87,7 +89,7 @@ public class ClientServiceGrpc {
             }
         }
 
-        private static class GetEventsHandler implements RpcCallHandler<Connection, WebServiceStreamingResponse> {
+        private static class GetEventsHandler implements RpcCallHandler<SimpleConnection, WebServiceStreamingResponse> {
 
             private final Api serviceImpl;
 
@@ -96,7 +98,7 @@ public class ClientServiceGrpc {
             }
 
             @Override
-            public WebServiceStreamingResponse handle(Connection requestMessage) {
+            public WebServiceStreamingResponse handle(SimpleConnection requestMessage) {
 
                 final ChannelServiceWrapper channelService = ChannelServiceWrapper.getInstance();
                 final String streamId = channelService.getStreamId(requestMessage);
@@ -125,8 +127,8 @@ public class ClientServiceGrpc {
             }
 
             @Override
-            public Class<Connection> getParameterClass() {
-                return Connection.class;
+            public Class<SimpleConnection> getParameterClass() {
+                return SimpleConnection.class;
             }
         }
     }

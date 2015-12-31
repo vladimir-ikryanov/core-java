@@ -68,3 +68,7 @@ message SimpleEventRecord {
 message SimpleClientRequest {
     string client_id = 1;
 }
+
+message SimpleConnection {
+    string channel_token = 1;
+}

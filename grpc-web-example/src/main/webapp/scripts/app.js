@@ -9,7 +9,10 @@ requirejs.config({
         channelConnectionCredential: '../build/scripts/ChannelConnectionCredential',
         channelConnectionResponse: '../build/scripts/ChannelConnectionResponse',
         simpleCommandRequest: '../build/scripts/SimpleCommandRequest',
-        simpleClientRequest: '../build/scripts/SimpleClientRequest'
+        simpleCommandResponse: '../build/scripts/SimpleCommandResponse',
+        simpleClientRequest: '../build/scripts/SimpleClientRequest',
+        simpleConnection: '../build/scripts/SimpleConnection',
+        clientServiceGrpc: '../build/scripts/ClientServiceGrpc'
     }
 });
 
@@ -22,10 +25,16 @@ requirejs([
     'channelConnectionCredential',
     'channelConnectionResponse',
     'simpleCommandRequest',
-    'simpleClientRequest'], function ($, long, byteBuffer, protoBuf, constants,
-                                      ChannelConnectionCredential, ChannelConnectionResponse,
-                                      SimpleCommandRequest, SimpleClientRequest) {
+    'simpleCommandResponse',
+    'simpleClientRequest',
+    'simpleConnection',
+    'clientServiceGrpc'], function ($, long, byteBuffer, protoBuf, constants,
+                                    ChannelConnectionCredential, ChannelConnectionResponse,
+                                    SimpleCommandRequest, SimpleCommandResponse, SimpleClientRequest, SimpleConnection,
+                                    ClientServiceGrpc) {
     console.info('Module loaded');
+
+    var clientService = new ClientServiceGrpc();
 
     $("#connect_app").bind('click', function (e) {
         console.log('Binding App...');
@@ -74,16 +83,14 @@ requirejs([
     $("#connect_stream").bind('click', function (e) {
         console.log('Connecting stream...');
 
-        var clientRequest = new SimpleClientRequest($("#app_token").val()).toBase64();
+        var clientRequest = new SimpleClientRequest($("#app_token").val());
 
-        $.ajax({
-            type: 'POST',
-            url: '/clientService',
-            data: 'rpc_method_type=Connect&rpc_method_argument=' + clientRequest
-        }).done(function (data) {
-            console.log("Stream connection successful");
-        }).fail(function (error) {
-            console.log("Could not broadcast: {}.", error);
+        var connectionPromise = clientService.Connect(clientRequest);
+
+        connectionPromise.then(function (result) {
+            console.log("Stream connection successful: {}", result);
+        }, function (reason) {
+            console.log("Could not connect stream: {}.", reason);
         });
 
         e.stopPropagation();
