@@ -12,7 +12,9 @@ requirejs.config({
         simpleCommandResponse: '../build/scripts/SimpleCommandResponse',
         simpleClientRequest: '../build/scripts/SimpleClientRequest',
         simpleConnection: '../build/scripts/SimpleConnection',
-        clientServiceGrpc: '../build/scripts/ClientServiceGrpc'
+        clientServiceGrpc: '../build/scripts/ClientServiceGrpc',
+        channelConnectingGrpc: '../build/scripts/ChannelConnectingGrpc',
+        connectionService: "services/ConnectionService"
     }
 });
 
@@ -28,29 +30,35 @@ requirejs([
     'simpleCommandResponse',
     'simpleClientRequest',
     'simpleConnection',
-    'clientServiceGrpc'], function ($, long, byteBuffer, protoBuf, constants,
+    'clientServiceGrpc',
+    'channelConnectingGrpc',
+    'connectionService'], function ($, long, byteBuffer, protoBuf, constants,
                                     ChannelConnectionCredential, ChannelConnectionResponse,
-                                    SimpleCommandRequest, SimpleCommandResponse, SimpleClientRequest, SimpleConnection,
-                                    ClientServiceGrpc) {
+                                    SimpleCommandRequest, SimpleCommandResponse, SimpleClientRequest,
+                                    SimpleConnection, ClientServiceGrpc, ChannelConnectingGrpc, ConnectionService) {
     console.info('Module loaded');
 
     var clientService = new ClientServiceGrpc();
+    var channelConnecting = new ChannelConnectingGrpc();
+
+    var connectionService = new ConnectionService({name: "Dummmy"});
 
     $("#connect_app").bind('click', function (e) {
         console.log('Binding App...');
 
-        var credential = new ChannelConnectionCredential($("#app_credential").val()).toBase64();
+        var credential = new ChannelConnectionCredential($("#app_credential").val());
 
-        $.ajax({
-            type: 'POST',
-            url: '/channelConnecting',
-            data: 'rpc_method_type=Connect&rpc_method_argument=' + credential
-        }).done(function (data) {
-            var convertedResult = ChannelConnectionResponse.decode(data);
-            console.log("App bound. Received channelId: " + convertedResult.channel_id);
-            $("#app_token").val(convertedResult.channel_id);
+        var connectionPromise = channelConnecting.Connect(credential);
 
-            connect(convertedResult.channel_id);
+        connectionService.Connect();
+
+        connectionPromise.then(function (result) {
+            console.log("App bound. Received channelId: " + result.channel_id);
+            $("#app_token").val(result.channel_id);
+
+            connect(result.channel_id);
+        }, function (reason) {
+            console.log("Could not bind app: {}.", reason)
         });
 
         e.stopPropagation();
@@ -62,16 +70,14 @@ requirejs([
     $("#broadcast").bind('click', function (e) {
         console.log('Broacasting...');
 
-        var commandRequest = new SimpleCommandRequest("DummyRequestString").toBase64();
+        var commandRequest = new SimpleCommandRequest("DummyRequestString");
 
-        $.ajax({
-            type: 'POST',
-            url: '/clientService',
-            data: 'rpc_method_type=Post&rpc_method_argument=' + commandRequest
-        }).done(function (data) {
-            console.log("Broadcast successful");
-        }).fail(function (error) {
-            console.log("Could not broadcast: {}.", error);
+        var broadcastPromise = clientService.Post(commandRequest);
+
+        broadcastPromise.then(function (result) {
+            console.log("Broadcast successful: {}.", result);
+        }, function (reason) {
+            console.log("Could not broadcast: {}.", reason);
         });
 
         e.stopPropagation();

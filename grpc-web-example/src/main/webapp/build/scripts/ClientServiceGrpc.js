@@ -5,7 +5,6 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
         };
 
         ClientServiceGrpc.prototype.Connect = function (requestArgument) {
-
             return new Promise(function (resolve, reject) {
                 if (!requestArgument instanceof clientRequest) {
                     reject(new Error("Invalid argument."));
@@ -36,7 +35,7 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
                     $.ajax({
                         type: 'POST',
                         url: Constants.ClientServicePath,
-                        data: 'rpc_method_type=Connect&rpc_method_argument=' + value
+                        data: 'rpc_method_type=Post&rpc_method_argument=' + value
                     }).done(function (data) {
                         var convertedResult = commandResponse.decode(data);
                         resolve(convertedResult);
