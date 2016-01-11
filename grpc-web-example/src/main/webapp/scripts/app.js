@@ -46,20 +46,9 @@ requirejs([
     $("#connect_app").bind('click', function (e) {
         console.log('Binding App...');
 
-        var credential = new ChannelConnectionCredential($("#app_credential").val());
+        var credentialValue = $("#app_credential").val();
 
-        var connectionPromise = channelConnecting.Connect(credential);
-
-        connectionService.Connect();
-
-        connectionPromise.then(function (result) {
-            console.log("App bound. Received channelId: " + result.channel_id);
-            $("#app_token").val(result.channel_id);
-
-            connect(result.channel_id);
-        }, function (reason) {
-            console.log("Could not bind app: {}.", reason)
-        });
+        connectionService.Connect(credentialValue);
 
         e.stopPropagation();
         e.preventDefault();
@@ -105,30 +94,3 @@ requirejs([
         return false;
     });
 });
-
-function connect(token) {
-    channel = new goog.appengine.Channel(token);
-
-    socket = channel.open();
-
-    socket.onopen = onOpened;
-    socket.onmessage = onMessage;
-    socket.onerror = onError;
-    socket.onclose = onClose;
-}
-
-var onOpened = function () {
-    console.log("Socket opened");
-};
-
-var onMessage = function (data) {
-    console.log("Message received: {}.", data);
-};
-
-var onError = function (data) {
-    console.log("Error happened: {}.", data);
-};
-
-var onClose = function () {
-    console.log("Socket closed.")
-};

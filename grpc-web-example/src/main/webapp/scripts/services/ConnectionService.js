@@ -18,8 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-define(['protobuf', 'constants', 'channelConnectingGrpc'],
-    function (protobuf, constants, ChannelConnectingGrpc) {
+define(['protobuf', 'constants', 'channelConnectingGrpc',
+        'channelConnectionCredential'],
+    function (protobuf, constants, ChannelConnectingGrpc,
+              ChannelConnectionCredential) {
         var channelConnectingGrpc = new ChannelConnectingGrpc();
         var _eventBus;
 
@@ -27,10 +29,20 @@ define(['protobuf', 'constants', 'channelConnectingGrpc'],
             _eventBus = eventBus;
         };
 
-        ConnectionService.prototype.Connect = function () {
+        ConnectionService.prototype.Connect = function (credentialString) {
             //get credential somewhere
 
-            console.log("Hello from Connect stub, eventBus is {}.", _eventBus);
+            var credential = new ChannelConnectionCredential(credentialString);
+            var connectionPromise = channelConnectingGrpc.Connect(credential);
+
+            connectionPromise.then(function (result) {
+                console.log("App bound. Received channelId: " + result.channel_id);
+                $("#app_token").val(result.channel_id);
+
+                connect(result.channel_id);
+            }, function (reason) {
+                console.log("Could not bind app: {}.", reason)
+            });
         };
 
         //wrap connect method with functionality from app.js
@@ -38,3 +50,30 @@ define(['protobuf', 'constants', 'channelConnectingGrpc'],
 
         return ConnectionService;
     });
+
+function connect(token) {
+    channel = new goog.appengine.Channel(token);
+
+    socket = channel.open();
+
+    socket.onopen = onOpened;
+    socket.onmessage = onMessage;
+    socket.onerror = onError;
+    socket.onclose = onClose;
+}
+
+var onOpened = function () {
+    console.log("Socket opened");
+};
+
+var onMessage = function (data) {
+    console.log("Message received: {}.", data);
+};
+
+var onError = function (data) {
+    console.log("Error happened: {}.", data);
+};
+
+var onClose = function () {
+    console.log("Socket closed.")
+};
