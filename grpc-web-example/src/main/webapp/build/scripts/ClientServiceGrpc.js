@@ -1,7 +1,15 @@
 define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
-        'simpleCommandRequest', 'simpleCommandResponse'],
-    function (protobuf, constants, clientRequest, simpleConnection, commandRequest, commandResponse) {
-        var ClientServiceGrpc = function () {
+        'simpleCommandRequest', 'simpleCommandResponse', 'events', 'webServiceStreamingResponse', 'simpleEventRecord'],
+    function (protobuf, constants, clientRequest, simpleConnection, commandRequest, commandResponse, events,
+              WebServiceStreamingResponse, SimpleEventRecord) {
+        var _eventBus;
+
+        var ClientServiceGrpc = function (eventBus) {
+            _eventBus = eventBus;
+
+            _eventBus.on(Events.MESSAGE_RECEIVED, function (event, data) {
+                console.log("Got da message from event bus: {}.", data);
+            })
         };
 
         ClientServiceGrpc.prototype.Connect = function (requestArgument) {
@@ -47,7 +55,26 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
         };
 
         ClientServiceGrpc.prototype.GetEvents = function (requestArgument) {
-            //TODO:2015-12-31: Implement later.
+            // call backend
+            // get ok
+            // subscribe for stream
+            var value = requestArgument.toBase64();
+
+            $.ajax({
+                type: 'POST',
+                url: Constants.ClientServicePath,
+                data: 'rpc_method_type=GetEvents&rpc_method_argument=' + value
+            }).done(function (data) {
+                var message = WebServiceStreamingResponse.decode(data);
+                var stream_id = message.stream_id;
+
+                _eventBus.on(Events.MESSAGE_RECEIVED, function (event, data) {
+                    if (data.stream_id == stream_id) {
+                        console.log("Service got proper message: {}", SimpleEventRecord.decode(data.data_base64));
+                    }
+                });
+            });
+
         };
 
         return ClientServiceGrpc;

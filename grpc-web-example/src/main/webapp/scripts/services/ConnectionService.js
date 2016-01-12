@@ -19,9 +19,9 @@
  */
 
 define(['protobuf', 'constants', 'channelConnectingGrpc',
-        'channelConnectionCredential'],
+        'channelConnectionCredential', 'rpcResponse', 'events'],
     function (protobuf, constants, ChannelConnectingGrpc,
-              ChannelConnectionCredential) {
+              ChannelConnectionCredential, RpcResponse, events) {
         var channelConnectingGrpc = new ChannelConnectingGrpc();
         var _eventBus;
 
@@ -39,7 +39,7 @@ define(['protobuf', 'constants', 'channelConnectingGrpc',
                 console.log("App bound. Received channelId: " + result.channel_id);
                 $("#app_token").val(result.channel_id);
 
-                connect(result.channel_id);
+                connect(result.channel_id, _eventBus, RpcResponse);
             }, function (reason) {
                 console.log("Could not bind app: {}.", reason)
             });
@@ -51,23 +51,25 @@ define(['protobuf', 'constants', 'channelConnectingGrpc',
         return ConnectionService;
     });
 
-function connect(token) {
+function connect(token, eventBus, RpcResponse) {
     channel = new goog.appengine.Channel(token);
 
     socket = channel.open();
 
     socket.onopen = onOpened;
-    socket.onmessage = onMessage;
+    socket.onmessage = function (data) {
+        console.log("Message received: {}.", data);
+
+        var response = RpcResponse.decode(data.data);
+        // TODO:2016-01-11:mikhail.mikhaylov: Optimize event type.
+        eventBus.trigger(Events.MESSAGE_RECEIVED, response);
+    };
     socket.onerror = onError;
     socket.onclose = onClose;
 }
 
 var onOpened = function () {
     console.log("Socket opened");
-};
-
-var onMessage = function (data) {
-    console.log("Message received: {}.", data);
 };
 
 var onError = function (data) {
@@ -77,3 +79,4 @@ var onError = function (data) {
 var onClose = function () {
     console.log("Socket closed.")
 };
+

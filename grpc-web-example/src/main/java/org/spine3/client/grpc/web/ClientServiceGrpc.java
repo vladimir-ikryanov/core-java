@@ -9,18 +9,6 @@ import java.util.Map;
 @SuppressWarnings("AccessCanBeTightened")
 public class ClientServiceGrpc {
 
-    //THIS STUFF IS REQUIRED FOR CHANNELING RESPONSES
-    //TODO:2015-12-24:mikhail.mikhaylov: Move this to implementation.
-    static {
-        ChannelServiceWrapper.getInstance().registerStreamIdConverter(Connection.class,
-                new ChannelServiceWrapper.StreamIdConverter<Connection>() {
-                    @Override
-                    public String convert(Connection argument) {
-                        return argument.getChannel().getToken();
-                    }
-                });
-    }
-
     private ClientServiceGrpc() {
     }
 
@@ -101,7 +89,9 @@ public class ClientServiceGrpc {
             public WebServiceStreamingResponse handle(SimpleConnection requestMessage) {
 
                 final ChannelServiceWrapper channelService = ChannelServiceWrapper.getInstance();
-                final String streamId = channelService.getStreamId(requestMessage);
+                // This is not stream id now
+                final String channelId = channelService.getStreamId(requestMessage);
+                final String streamId = channelService.openStream(channelId);
 
                 serviceImpl.getEvents(requestMessage, new StreamObserver<SimpleEventRecord>() {
                     @Override

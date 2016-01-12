@@ -12,9 +12,13 @@ requirejs.config({
         simpleCommandResponse: '../build/scripts/SimpleCommandResponse',
         simpleClientRequest: '../build/scripts/SimpleClientRequest',
         simpleConnection: '../build/scripts/SimpleConnection',
+        simpleEventRecord: '../build/scripts/SimpleEventRecord',
         clientServiceGrpc: '../build/scripts/ClientServiceGrpc',
         channelConnectingGrpc: '../build/scripts/ChannelConnectingGrpc',
-        connectionService: "services/ConnectionService"
+        connectionService: "services/ConnectionService",
+        rpcResponse: "../build/scripts/RpcResponse",
+        events: "../build/scripts/Events",
+        webServiceStreamingResponse: "../build/scripts/WebServiceStreamingResponse"
     }
 });
 
@@ -38,10 +42,10 @@ requirejs([
                                     SimpleConnection, ClientServiceGrpc, ChannelConnectingGrpc, ConnectionService) {
     console.info('Module loaded');
 
-    var clientService = new ClientServiceGrpc();
-    var channelConnecting = new ChannelConnectingGrpc();
+    var eventBus = $(".event-bus");
 
-    var connectionService = new ConnectionService({name: "Dummmy"});
+    var clientService = new ClientServiceGrpc(eventBus);
+    var connectionService = new ConnectionService(eventBus);
 
     $("#connect_app").bind('click', function (e) {
         console.log('Binding App...');
@@ -87,6 +91,19 @@ requirejs([
         }, function (reason) {
             console.log("Could not connect stream: {}.", reason);
         });
+
+        e.stopPropagation();
+        e.preventDefault();
+
+        return false;
+    });
+
+    $("#get_events").bind('click', function (e) {
+        console.log("Testing Get Events..");
+
+        var argument = new SimpleConnection($("#app_credential").val());
+
+        clientService.GetEvents(argument);
 
         e.stopPropagation();
         e.preventDefault();
