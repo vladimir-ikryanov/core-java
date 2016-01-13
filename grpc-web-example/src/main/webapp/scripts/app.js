@@ -1,24 +1,24 @@
 requirejs.config({
     baseUrl: 'scripts',
     paths: {
-        long: 'long',
-        bytebuffer: 'bytebuffer',
-        jquery: 'jquery-2.1.4',
-        protobuf: 'protobuf',
-        constants: 'Constants',
-        channelConnectionCredential: '../build/scripts/ChannelConnectionCredential',
-        channelConnectionResponse: '../build/scripts/ChannelConnectionResponse',
-        simpleCommandRequest: '../build/scripts/SimpleCommandRequest',
-        simpleCommandResponse: '../build/scripts/SimpleCommandResponse',
-        simpleClientRequest: '../build/scripts/SimpleClientRequest',
-        simpleConnection: '../build/scripts/SimpleConnection',
-        simpleEventRecord: '../build/scripts/SimpleEventRecord',
-        clientServiceGrpc: '../build/scripts/ClientServiceGrpc',
-        channelConnectingGrpc: '../build/scripts/ChannelConnectingGrpc',
+        long: 'dependencies/long',
+        bytebuffer: 'dependencies/bytebuffer',
+        jquery: 'dependencies/jquery-2.1.4',
+        protobuf: 'dependencies/protobuf',
+        constants: 'common/Constants',
+        channelConnectionCredential: '../build/scripts/proto/ChannelConnectionCredential',
+        channelConnectionResponse: '../build/scripts/proto/ChannelConnectionResponse',
+        simpleCommandRequest: '../build/scripts/proto/SimpleCommandRequest',
+        simpleCommandResponse: '../build/scripts/proto/SimpleCommandResponse',
+        simpleClientRequest: '../build/scripts/proto/SimpleClientRequest',
+        simpleConnection: '../build/scripts/proto/SimpleConnection',
+        simpleEventRecord: '../build/scripts/proto/SimpleEventRecord',
+        clientServiceGrpc: '../build/scripts/grpc/ClientServiceGrpc',
+        channelConnectingGrpc: '../build/scripts/grpc/ChannelConnectingGrpc',
         connectionService: "services/ConnectionService",
-        rpcResponse: "../build/scripts/RpcResponse",
-        events: "../build/scripts/Events",
-        webServiceStreamingResponse: "../build/scripts/WebServiceStreamingResponse"
+        rpcResponse: "../build/scripts/proto/RpcResponse",
+        events: "../build/scripts/common/Events",
+        webServiceStreamingResponse: "../build/scripts/proto/WebServiceStreamingResponse"
     }
 });
 
