@@ -49,7 +49,7 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
             });
         };
 
-        ClientServiceGrpc.prototype.GetEvents = function (requestArgument) {
+        ClientServiceGrpc.prototype.GetEvents = function (requestArgument, streamingCallback) {
             var value = requestArgument.toBase64();
 
             $.ajax({
@@ -63,7 +63,9 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
                 _eventBus.on(Events.MESSAGE_RECEIVED, function (event, data) {
                     console.log("I am {}, got mesage for {}", stream_id, data.stream_id);
                     if (data.stream_id == stream_id) {
-                        console.log("Service got proper message: {}", SimpleEventRecord.decode(data.data_base64));
+                        var decodedEvent = SimpleEventRecord.decode(data.data_base64);
+                        console.log("Service got proper message: {}", decodedEvent);
+                        streamingCallback.onNext(decodedEvent);
                     }
                 });
             });

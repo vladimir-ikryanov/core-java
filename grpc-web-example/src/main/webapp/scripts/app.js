@@ -85,7 +85,18 @@ requirejs([
 
         var argument = new SimpleConnection($("#app_credential").val());
 
-        clientService.GetEvents(argument);
+        var streamingCallback = {};
+        streamingCallback.onNext = function (event) {
+            console.log("Application got an event: {}.", event)
+        };
+        streamingCallback.onCompleted = function () {
+            console.log("Application got streaming call completion signal.")
+        };
+        streamingCallback.onError = function (reason) {
+            console.log("Application got streaming call error signal: {}.", reason)
+        };
+
+        clientService.GetEvents(argument, streamingCallback);
 
         e.stopPropagation();
         e.preventDefault();
