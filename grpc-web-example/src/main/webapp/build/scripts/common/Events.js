@@ -19,5 +19,7 @@
  */
 
 var Events = {
-    MESSAGE_RECEIVED: "message_received"
+    MESSAGE_RECEIVED: "message_received",
+    CALL_COMPLETED: "call_completed",
+    CALL_FAILED: "call_failed"
 };

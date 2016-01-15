@@ -35,5 +35,6 @@ public class ClientServiceWebImpl extends ClientServiceGrpc.WebServlet {
         for (int i = 0; i < 10; i++) {
             resultObserver.onNext(SimpleEventRecord.newBuilder().setValue("Event " + i).build());
         }
+        resultObserver.onCompleted();
     }
 }

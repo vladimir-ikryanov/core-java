@@ -17,6 +17,9 @@ import java.util.*;
 @SuppressWarnings({"AccessCanBeTightened", "WeakerAccess"}) // We don't want to hide API.
 public class ChannelServiceWrapper {
 
+    // TODO:2016-01-15:mikhal.mikhaylov: Refactor protobuf completion representation.
+    private static final String STREAM_COMPLETION_STATUS = "Ok.";
+
     private static final ChannelServiceWrapper instance = new ChannelServiceWrapper();
     private final ChannelService channelService;
     private final Map<Class<?>, ChannelIdConverter<?>> converters = new HashMap<>();
@@ -92,8 +95,7 @@ public class ChannelServiceWrapper {
      *
      * @param streamId stream's id.
      */
-    public void closeStream(String streamId) {
-        //TODO:2015-12-24:mikhail.mikhaylov: Send closing signal.
+    private void closeStream(String streamId) {
         openStreams.remove(streamId);
     }
 
@@ -128,19 +130,31 @@ public class ChannelServiceWrapper {
         final RpcResponse rpcResponseMessage =
                 RpcResponse.newBuilder().setStreamId(streamId).setDataBase64(base64).build();
 
-        final String base64Response = DatatypeConverter.printBase64Binary(rpcResponseMessage.toByteArray());
-
-        channelService.sendMessage(new ChannelMessage(openStreams.get(streamId), base64Response));
+        sendMessage(streamId, rpcResponseMessage);
     }
 
     public void sendCompleteSignal(String streamId) {
-        // TODO:2016-01-15:mikhail.mikhaylov: Implement completion signal.
+        final RpcResponse rpcResponseMessage = RpcResponse.newBuilder()
+                .setStreamId(streamId)
+                .setCompletionStatus(STREAM_COMPLETION_STATUS).build();
+
+        sendMessage(streamId, rpcResponseMessage);
         closeStream(streamId);
     }
 
     public void sendErrorSignal(String streamId, String reason) {
-        // TODO:2016-01-15:mikhail.mikhaylov: Implement error signal.
+        final RpcResponse rpcResponseMessage = RpcResponse.newBuilder()
+                .setStreamId(streamId)
+                .setErrorCause(reason).build();
+
+        sendMessage(streamId, rpcResponseMessage);
         closeStream(streamId);
+    }
+
+    private void sendMessage(String streamId, RpcResponse rpcResponse) {
+        final String base64Response = DatatypeConverter.printBase64Binary(rpcResponse.toByteArray());
+
+        channelService.sendMessage(new ChannelMessage(openStreams.get(streamId), base64Response));
     }
 
     /**

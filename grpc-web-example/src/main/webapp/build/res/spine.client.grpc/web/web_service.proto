@@ -46,7 +46,11 @@ message VoidRpcArgument {
 
 message RpcResponse {
     string stream_id = 1;
-    string data_base64 = 2;
+    oneof result {
+        string data_base64 = 2;         // for onNext
+        string completion_status = 3;   // for onComplete
+        string error_cause = 4;         // for onError
+    }
 }
 
 message PhraseSaidEvent {

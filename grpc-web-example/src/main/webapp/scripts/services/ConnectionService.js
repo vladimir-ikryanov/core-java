@@ -61,8 +61,17 @@ function connect(token, eventBus, RpcResponse) {
         console.log("Message received: {}.", data);
 
         var response = RpcResponse.decode(data.data);
-        // TODO:2016-01-11:mikhail.mikhaylov: Optimize event type.
-        eventBus.trigger(Events.MESSAGE_RECEIVED, response);
+        switch (response.result) {
+            case "data_base64":
+                eventBus.trigger(Events.MESSAGE_RECEIVED, response);
+                break;
+            case "completion_status":
+                eventBus.trigger(Events.CALL_COMPLETED, response);
+                break;
+            case "error_cause":
+                eventBus.trigger(Events.CALL_FAILED, response);
+                break;
+        }
     };
     socket.onerror = onError;
     socket.onclose = onClose;

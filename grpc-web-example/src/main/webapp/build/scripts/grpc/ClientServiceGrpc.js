@@ -61,11 +61,24 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
                 var stream_id = message.stream_id;
 
                 _eventBus.on(Events.MESSAGE_RECEIVED, function (event, data) {
-                    console.log("I am {}, got mesage for {}", stream_id, data.stream_id);
                     if (data.stream_id == stream_id) {
                         var decodedEvent = SimpleEventRecord.decode(data.data_base64);
                         console.log("Service got proper message: {}", decodedEvent);
                         streamingCallback.onNext(decodedEvent);
+                    }
+                });
+                _eventBus.on(Events.CALL_COMPLETED, function (event, data) {
+                    if (data.stream_id == stream_id) {
+                        console.log("Service call completed");
+                        streamingCallback.onCompleted();
+                        // remove listeners
+                    }
+                });
+                _eventBus.on(Events.CALL_FAILED, function (event, data) {
+                    if (data.stream_id == stream_id) {
+                        console.log("Service call failed");
+                        streamingCallback.onError(data.error_cause);
+                        // remove listeners
                     }
                 });
             });
