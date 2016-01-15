@@ -59,6 +59,9 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
             }).done(function (data) {
                 var message = WebServiceStreamingResponse.decode(data);
                 var stream_id = message.stream_id;
+                //
+                //var messageReceivedCallback = new MessageReceiveCallbackFunction(event,
+                //    data, stream_id, streamingCallback);
 
                 _eventBus.on(Events.MESSAGE_RECEIVED, function (event, data) {
                     if (data.stream_id == stream_id) {
@@ -72,6 +75,7 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
                         console.log("Service call completed");
                         streamingCallback.onCompleted();
                         // remove listeners
+                        _eventBus.off(this);
                     }
                 });
                 _eventBus.on(Events.CALL_FAILED, function (event, data) {
@@ -79,6 +83,7 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
                         console.log("Service call failed");
                         streamingCallback.onError(data.error_cause);
                         // remove listeners
+                        _eventBus.off(this);
                     }
                 });
             });
@@ -87,3 +92,4 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
 
         return ClientServiceGrpc;
     });
+
