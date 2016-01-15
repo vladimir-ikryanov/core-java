@@ -5,7 +5,7 @@ import io.grpc.stub.StreamObserver;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("AccessCanBeTightened")
+@SuppressWarnings({"AccessCanBeTightened", "WeakerAccess"})
 public class ClientServiceGrpc {
 
     private ClientServiceGrpc() {
@@ -104,7 +104,7 @@ public class ClientServiceGrpc {
                 channelService.closeStream(streamId);
             }
 
-            public String getStreamId() {
+            private String getStreamId() {
                 return streamId;
             }
         }
