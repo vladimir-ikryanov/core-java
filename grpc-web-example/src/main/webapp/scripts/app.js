@@ -61,16 +61,16 @@ requirejs([
     });
 
     $("#broadcast").bind('click', function (e) {
-        console.log('Broacasting...');
+        console.log('Posting command...');
 
         var commandRequest = new SimpleCommandRequest("DummyRequestString");
 
         var broadcastPromise = clientService.Post(commandRequest);
 
         broadcastPromise.then(function (result) {
-            console.log("Broadcast successful: {}.", result);
+            console.log("Posting command successful: {}.", result);
         }, function (reason) {
-            console.log("Could not broadcast: {}.", reason);
+            console.log("Could not post command: {}.", reason);
         });
 
         e.stopPropagation();
@@ -79,24 +79,6 @@ requirejs([
         return false;
     });
 
-    $("#connect_stream").bind('click', function (e) {
-        console.log('Connecting stream...');
-
-        var clientRequest = new SimpleClientRequest($("#app_token").val());
-
-        var connectionPromise = clientService.Connect(clientRequest);
-
-        connectionPromise.then(function (result) {
-            console.log("Stream connection successful: {}", result);
-        }, function (reason) {
-            console.log("Could not connect stream: {}.", reason);
-        });
-
-        e.stopPropagation();
-        e.preventDefault();
-
-        return false;
-    });
 
     $("#get_events").bind('click', function (e) {
         console.log("Testing Get Events..");

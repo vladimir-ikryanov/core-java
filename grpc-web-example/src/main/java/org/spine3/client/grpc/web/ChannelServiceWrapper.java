@@ -17,9 +17,9 @@ import java.util.*;
 @SuppressWarnings("AccessCanBeTightened") // We don't want to hide API.
 public class ChannelServiceWrapper {
 
-    private static ChannelServiceWrapper instance = new ChannelServiceWrapper();
+    private static final ChannelServiceWrapper instance = new ChannelServiceWrapper();
     private final ChannelService channelService;
-    private Map<Class<?>, StreamIdConverter<?>> converters = new HashMap<>();
+    private final Map<Class<?>, ChannelIdConverter<?>> converters = new HashMap<>();
     private List<String> openChannels = new ArrayList<>();
     private Map<String, String> openStreams = new HashMap<>();
 
@@ -59,17 +59,32 @@ public class ChannelServiceWrapper {
      * <p>
      * Streams belong to channels, and before closing channel you should close all streams of this channel.
      *
-     * @param channelTokenId stream channel's tokenId
+     * @param channelId stream channel's tokenId
      * @return streamId.
      */
-    public String openStream(String channelTokenId) {
-        String randomId = UUID.randomUUID().toString();
-        //TODO:2015-12-24:mikhail.mikhaylov: Check if collisions may appear.
-//        while (openChannels.contains(randomId)) {
-//            randomId = UUID.randomUUID().toString();
-//        }
-        openStreams.put(randomId, channelTokenId);
+    private String openStream(String channelId) {
+        final String randomId = UUID.randomUUID().toString();
+        openStreams.put(randomId, channelId);
         return randomId;
+    }
+
+    /**
+     * Retrieves Stream Id from RPC argument using registered converters.
+     *
+     * @param callArgument RPC method argument
+     * @param <T>          RPC method argument type
+     * @return String Stream Id.
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends Message> String openStream(T callArgument) {
+        final Class argumentClass = callArgument.<T>getClass();
+        final ChannelIdConverter converter = converters.get(argumentClass);
+        if (converter == null) {
+            throw new IllegalStateException("No converter registered for call argument: " + argumentClass);
+        }
+        final String channelId = converter.convert(callArgument);
+        final String streamId = openStream(channelId);
+        return streamId;
     }
 
     /**
@@ -88,28 +103,11 @@ public class ChannelServiceWrapper {
      * @param streamId Id of channel's stream
      * @return channel Id.
      */
-    public String getStreamChannel(String streamId) {
+    private String getStreamChannel(String streamId) {
         if (!openStreams.containsKey(streamId)) {
             throw new IllegalArgumentException("No open channel for such streamId: " + streamId);
         }
         return openStreams.get(streamId);
-    }
-
-    /**
-     * Retrieves Stream Id from RPC argument using registered converters.
-     *
-     * @param callArgument RPC method argument
-     * @param <T>          RPC method argument type
-     * @return String Stream Id.
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends Message> String getStreamId(T callArgument) {
-        Class argumentClass = callArgument.<T>getClass();
-        final StreamIdConverter converter = converters.get(argumentClass);
-        if (converter == null) {
-            throw new IllegalStateException("No converter registered for call argument: " + argumentClass);
-        }
-        return converter.convert(callArgument);
     }
 
     /**
@@ -120,7 +118,7 @@ public class ChannelServiceWrapper {
      * @param forClass  RPC method argument type
      * @param converter argument Converter.
      */
-    public void registerStreamIdConverter(Class<?> forClass, StreamIdConverter<?> converter) {
+    public void registerStreamIdConverter(Class<?> forClass, ChannelIdConverter<?> converter) {
         converters.put(forClass, converter);
     }
 
@@ -131,33 +129,17 @@ public class ChannelServiceWrapper {
                 RpcResponse.newBuilder().setStreamId(streamId).setDataBase64(base64).build();
 
         final String base64Response = DatatypeConverter.printBase64Binary(rpcResponseMessage.toByteArray());
-        // SEND MESSAGE
-        // SEND CHANNEL ID
 
         channelService.sendMessage(new ChannelMessage(openStreams.get(streamId), base64Response));
     }
 
     /**
-     * Broadcasts message to ALL open streams.
-     * <p>
-     * Test purposes ONLY. Redesign required. Should be VERY slow.
-     *
-     * @param message Broadcasting message.
-     */
-    @Deprecated
-    public void broadCast(Message message) {
-        for (String stream : openStreams.keySet()) {
-            sendMessage(message, stream);
-        }
-    }
-
-    /**
-     * As we can define a service with any possible message as argument and stream as result, we
-     * must know how to associate it's call's result with open stream.
+     * As we can define a service with any possible message as argument and channel id as result, we
+     * must know how to associate it's call's result with open channel.
      *
      * @param <T> RPC call argument
      */
-    public interface StreamIdConverter<T extends Message> {
+    public interface ChannelIdConverter<T extends Message> {
         String convert(T argument);
     }
 }

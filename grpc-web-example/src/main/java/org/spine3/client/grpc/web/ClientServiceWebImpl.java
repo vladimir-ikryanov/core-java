@@ -1,8 +1,6 @@
 package org.spine3.client.grpc.web;
 
-import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
-import org.spine3.base.EventRecord;
 import org.spine3.client.Connection;
 
 public class ClientServiceWebImpl extends ClientServiceGrpc.WebServlet {
@@ -11,14 +9,14 @@ public class ClientServiceWebImpl extends ClientServiceGrpc.WebServlet {
 
     static {
         ChannelServiceWrapper.getInstance().registerStreamIdConverter(Connection.class,
-                new ChannelServiceWrapper.StreamIdConverter<Connection>() {
+                new ChannelServiceWrapper.ChannelIdConverter<Connection>() {
                     @Override
                     public String convert(Connection argument) {
                         return argument.getChannel().getToken();
                     }
                 });
         ChannelServiceWrapper.getInstance().registerStreamIdConverter(SimpleConnection.class,
-                new ChannelServiceWrapper.StreamIdConverter<SimpleConnection>() {
+                new ChannelServiceWrapper.ChannelIdConverter<SimpleConnection>() {
                     @Override
                     public String convert(SimpleConnection argument) {
                         return argument.getChannelToken();
@@ -27,22 +25,7 @@ public class ClientServiceWebImpl extends ClientServiceGrpc.WebServlet {
     }
 
     @Override
-    public SimpleConnection connect(SimpleClientRequest request) {
-        // TODO:2015-12-24:mikhail.mikhaylov: Check if it's correct to identify clients by id.
-        // Do multiple web clients have different ids?
-        final String clientId = request.getClientId();
-        final String channelId = ChannelServiceWrapper.getInstance().openStream(clientId);
-        // TODO:2015-12-24:mikhail.mikhaylov: Migrate API to protobuf objects instead of Strings?
-        return SimpleConnection.newBuilder().setChannelToken(channelId).build();
-    }
-
-    @Override
     public SimpleCommandResponse post(SimpleCommandRequest request) {
-        // testing channel api
-        final PhraseSaidEvent broadcastEvent = PhraseSaidEvent.newBuilder().setPhrase("Hooray!").build();
-        ChannelServiceWrapper.getInstance().broadCast(EventRecord.newBuilder(EventRecord.getDefaultInstance())
-                .setEvent(Any.pack(broadcastEvent)).build());
-
         return SimpleCommandResponse.newBuilder().setValue("Ok").build();
     }
 
