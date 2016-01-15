@@ -94,14 +94,12 @@ public class ClientServiceGrpc {
 
             @Override
             public void onError(Throwable t) {
-                // TODO:2015-12-24:mikhail.mikhaylov: Publish error.
-                channelService.closeStream(streamId);
+                channelService.sendErrorSignal(streamId, t.getMessage());
             }
 
             @Override
             public void onCompleted() {
-                // TODO:2015-12-24:mikhail.mikhaylov: Publish success.
-                channelService.closeStream(streamId);
+                channelService.sendCompleteSignal(streamId);
             }
 
             private String getStreamId() {

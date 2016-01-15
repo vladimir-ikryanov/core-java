@@ -14,7 +14,7 @@ import java.util.*;
  * It should be moved from singleton as soon as it's clear how do we configure environment.
  */
 //TODO:2015-12-24:mikhail.mikhaylov: Migrate to TinyTypes.
-@SuppressWarnings("AccessCanBeTightened") // We don't want to hide API.
+@SuppressWarnings({"AccessCanBeTightened", "WeakerAccess"}) // We don't want to hide API.
 public class ChannelServiceWrapper {
 
     private static final ChannelServiceWrapper instance = new ChannelServiceWrapper();
@@ -131,6 +131,16 @@ public class ChannelServiceWrapper {
         final String base64Response = DatatypeConverter.printBase64Binary(rpcResponseMessage.toByteArray());
 
         channelService.sendMessage(new ChannelMessage(openStreams.get(streamId), base64Response));
+    }
+
+    public void sendCompleteSignal(String streamId) {
+        // TODO:2016-01-15:mikhail.mikhaylov: Implement completion signal.
+        closeStream(streamId);
+    }
+
+    public void sendErrorSignal(String streamId, String reason) {
+        // TODO:2016-01-15:mikhail.mikhaylov: Implement error signal.
+        closeStream(streamId);
     }
 
     /**
