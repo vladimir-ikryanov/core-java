@@ -29,6 +29,7 @@ import org.spine3.io.IoUtil;
 import org.spine3.protobuf.error.UnknownTypeInAnyException;
 import org.spine3.type.ClassName;
 import org.spine3.type.TypeName;
+import org.spine3.util.Resources;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,14 +61,15 @@ public class TypeToClassMap {
 
     /**
      * A map from Protobuf type name to Java class name.
-     *
+     * <p>
      * <p>Example:
      * <p>{@code spine.base.EventId} - {@code org.spine3.base.EventId}
      */
     private static final Map<TypeName, ClassName> NAMES_MAP = buildNamesMap();
 
 
-    private TypeToClassMap() {}
+    private TypeToClassMap() {
+    }
 
     /**
      * Retrieves Protobuf types known to the application.
@@ -100,7 +102,7 @@ public class TypeToClassMap {
 
     /**
      * Attempts to find a {@link ClassName} for the passed inner Protobuf type.
-     *
+     * <p>
      * <p>For example, com.package.OuterClass.InnerClass class name.
      *
      * @param type {@link TypeName} of the class to find
@@ -194,7 +196,7 @@ public class TypeToClassMap {
     @SuppressWarnings("TypeMayBeWeakened") // Not in this case
     private static ImmutableSet<Properties> loadAllProperties() {
 
-        final Enumeration<URL> resources = getResources();
+        final Enumeration<URL> resources = Resources.getResourceUrls(PROPERTIES_FILE_PATH);
         if (resources == null) {
             return ImmutableSet.<Properties>builder().build();
         }
@@ -205,19 +207,6 @@ public class TypeToClassMap {
             result.add(properties);
         }
         return result.build();
-    }
-
-    private static Enumeration<URL> getResources() {
-
-        Enumeration<URL> resources = null;
-        try {
-            resources = getContextClassLoader().getResources(PROPERTIES_FILE_PATH);
-        } catch (IOException e) {
-            if (log().isWarnEnabled()) {
-                log().warn("Failed to load resources: " + PROPERTIES_FILE_PATH, e);
-            }
-        }
-        return resources;
     }
 
     private static Properties loadPropertiesFile(URL resourceUrl) {
@@ -237,17 +226,13 @@ public class TypeToClassMap {
         return properties;
     }
 
-    private static ClassLoader getContextClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(TypeToClassMap.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }
