@@ -17,30 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.client.grpc.web;
 
-import com.google.protobuf.Message;
+package org.spine3.client.grpc.web.services;
 
-/**
- * An interface which describes a single RPC endpoint for an RPC service.
- *
- * @param <P> RPC call param
- * @param <R> RPC call result
- */
-public interface RpcCallHandler<P extends Message, R extends Message> {
+import org.spine3.client.grpc.web.ChannelConnectionCredential;
+import org.spine3.client.grpc.web.ChannelConnectionResponse;
+import org.spine3.client.grpc.web.ChannelServiceWrapper;
 
-    /**
-     * Rpc Method Handler itself. Should be implemented manually.
-     *
-     * @param requestMessage Rpc Method Argument
-     * @return Rpc Method Result
-     */
-    R handle(P requestMessage);
-
-    /**
-     * Returns Rpc Method Parameter class. Is implemented automatically with the generator.
-     *
-     * @return Class type instance
-     */
-    Class<P> getParameterClass();
+public class ChannelConnectingImpl extends ChannelConnectingGrpc.AbstractImpl {
+    @Override
+    public ChannelConnectionResponse connect(ChannelConnectionCredential request) {
+        final String credential = request.getCredential();
+        final String channelId = ChannelServiceWrapper.getInstance().openChannel(credential);
+        return ChannelConnectionResponse.newBuilder().setChannelId(channelId).build();
+    }
 }

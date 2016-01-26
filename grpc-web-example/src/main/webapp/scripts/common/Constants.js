@@ -1,4 +1,3 @@
 var Constants = {
-	'ChannelConnectingPath': '/channelConnecting',
-	'ClientServicePath': '/clientService'
+    'DispatcherPath': '/dispatcher'
 };

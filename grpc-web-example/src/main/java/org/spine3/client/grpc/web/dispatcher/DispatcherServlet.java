@@ -20,36 +20,125 @@
 
 package org.spine3.client.grpc.web.dispatcher;
 
+import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.client.grpc.web.AbstractServiceWebServlet;
+import org.spine3.client.grpc.web.RpcCallHandler;
+import org.spine3.client.grpc.web.SuccessfulRpcCall;
+import org.spine3.client.grpc.web.VoidRpcArgument;
 import org.spine3.client.grpc.web.services.RpcService;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.google.api.client.repackaged.com.google.common.base.Strings.isNullOrEmpty;
 
 //TODO:2016-01-18:mikhail.mikhaylov: Remove Utilities.
 
 /**
  * Main GRPC endpoint.
- * <p/>
- * This servlet will duplicate {@link AbstractServiceWebServlet} until it's API is well defined.
  */
 //TODO:2016-01-15:mikhail.mikhaylov: Remove this @SuppressWarning after AbstracteviceWebServletRemoval.
-@SuppressWarnings("DuplicateStringLiteralInspection")
+@SuppressWarnings({"DuplicateStringLiteralInspection", "Duplicates"})
 public class DispatcherServlet extends HttpServlet implements Dispatcher {
 
     private static final long serialVersionUID = -8158413818037999080L;
+    private static final String PROTOBUF_PARSE_FROM_METHOD_NAME = "parseFrom";
+    private static final String PROTO_MIME_TYPE = "application/x-protobuf";
 
+    @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private final Map<String, RpcService> registeredServices = new HashMap<>();
 
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
+    }
+
+    private static RpcCallHandler getRpcCallHandler(RpcService service, String rpcMethodName) {
+        if (isNullOrEmpty(rpcMethodName)) {
+            throw new IllegalArgumentException("Invalid rpcService argument.");
+        }
+        final RpcCallHandler rpcCallHandler = service.getRpcCallHandler(rpcMethodName);
+        if (rpcCallHandler == null) {
+            throw new IllegalStateException("No method handler found for argument.");
+        }
+        return rpcCallHandler;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Message invokeRpcMethod(RpcCallHandler handler, String rpcMethodArgument) {
+        if (handler.getParameterClass() != VoidRpcArgument.class && rpcMethodArgument == null) {
+            throw new IllegalArgumentException("Invalid RPC method argument.");
+        }
+
+        final Message rpcMethodCallResult;
+
+        if (handler.getParameterClass() == VoidRpcArgument.class) {
+            handler.handle(VoidRpcArgument.getDefaultInstance());
+
+            rpcMethodCallResult = SuccessfulRpcCall.getDefaultInstance();
+        } else {
+            final byte[] bytes = DatatypeConverter.parseBase64Binary(rpcMethodArgument);
+
+            Message messageArgument = null;
+            try {
+                messageArgument = (Message) handler.getParameterClass()
+                        .getMethod(PROTOBUF_PARSE_FROM_METHOD_NAME, byte[].class).invoke(null, (Object) bytes);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                // TODO:2015-12-23:mikhail.mikhylov: Return error.
+            }
+
+            rpcMethodCallResult = handler.handle(messageArgument);
+        }
+
+        return rpcMethodCallResult;
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private static void write(ServletResponse response, Message message) {
+        final byte[] serializedMsg = message.toByteArray();
+
+        final String base64 = DatatypeConverter.printBase64Binary(serializedMsg);
+
+        response.setContentType(PROTO_MIME_TYPE);
+        response.setCharacterEncoding(null);
+
+        final PrintWriter writer;
+        try {
+            writer = response.getWriter();
+            writer.write(base64);
+
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            getLog().error(e.getMessage(), e);
+        }
+    }
+
+    private static Logger getLog() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    @SuppressWarnings("RefusedBequest") // Servlet API
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        final String rpcServiceArg = req.getParameter(Arguments.RPC_SERVICE_ARGUMENT);
+        final String rpcMethodArg = req.getParameter(Arguments.RPC_METHOD_ARGUMENT);
+        final String rpcArgumentArg = req.getParameter(Arguments.RPC_REQUEST_ARGUMENT);
+
+        final RpcService service = getRpcService(rpcServiceArg);
+        final RpcCallHandler handler = getRpcCallHandler(service, rpcMethodArg);
+        final Message callResult = invokeRpcMethod(handler, rpcArgumentArg);
+
+        write(resp, callResult);
     }
 
     @Override
@@ -72,6 +161,17 @@ public class DispatcherServlet extends HttpServlet implements Dispatcher {
         // full names can solve this problem/
         // TODO:2016-01-18:mikhail.mikhaylov: Check if RpcService i enoght.
         registeredServices.put(clazz.getSimpleName(), service);
+    }
+
+    private RpcService getRpcService(String rpcServiceName) {
+        if (isNullOrEmpty(rpcServiceName)) {
+            throw new IllegalArgumentException("Invalid rpcService argument.");
+        }
+        final RpcService service = registeredServices.get(rpcServiceName);
+        if (service == null) {
+            throw new IllegalStateException("No service found for argument.");
+        }
+        return service;
     }
 
     private enum LogSingleton {

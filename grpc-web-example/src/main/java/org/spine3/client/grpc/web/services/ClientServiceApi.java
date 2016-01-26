@@ -17,30 +17,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.client.grpc.web;
 
-import com.google.protobuf.Message;
+package org.spine3.client.grpc.web.services;
 
-/**
- * An interface which describes a single RPC endpoint for an RPC service.
- *
- * @param <P> RPC call param
- * @param <R> RPC call result
- */
-public interface RpcCallHandler<P extends Message, R extends Message> {
+import io.grpc.stub.StreamObserver;
+import org.spine3.client.grpc.web.SimpleCommandRequest;
+import org.spine3.client.grpc.web.SimpleCommandResponse;
+import org.spine3.client.grpc.web.SimpleConnection;
+import org.spine3.client.grpc.web.SimpleEventRecord;
 
-    /**
-     * Rpc Method Handler itself. Should be implemented manually.
-     *
-     * @param requestMessage Rpc Method Argument
-     * @return Rpc Method Result
-     */
-    R handle(P requestMessage);
+@SuppressWarnings("WeakerAccess") // API
+public interface ClientServiceApi {
+    // rpc Post(CommandRequest) returns (CommandResponse);
+    // rpc Post(SimpleCommandRequest) returns (SimpleCommandResponse);
+    SimpleCommandResponse post(SimpleCommandRequest request);
 
-    /**
-     * Returns Rpc Method Parameter class. Is implemented automatically with the generator.
-     *
-     * @return Class type instance
-     */
-    Class<P> getParameterClass();
+    // rpc GetEvents(Connection) returns (stream spine.base.EventRecord);
+    void getEvents(SimpleConnection request, StreamObserver<SimpleEventRecord> resultObserver);
 }

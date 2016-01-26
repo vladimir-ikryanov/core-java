@@ -37,8 +37,8 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
 
                     $.ajax({
                         type: 'POST',
-                        url: Constants.ClientServicePath,
-                        data: 'rpc_method_type=Post&rpc_method_argument=' + value
+                        url: Constants.DispatcherPath,
+                        data: 'rpc_service_argument=ClientServiceGrpc&rpc_method_argument=Post&rpc_request_argument=' + value
                     }).done(function (data) {
                         var convertedResult = commandResponse.decode(data);
                         resolve(convertedResult);
@@ -54,15 +54,11 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
 
             $.ajax({
                 type: 'POST',
-                url: Constants.ClientServicePath,
-                data: 'rpc_method_type=GetEvents&rpc_method_argument=' + value
+                url: Constants.DispatcherPath,
+                data: 'rpc_service_argument=ClientServiceGrpc&rpc_method_argument=GetEvents&rpc_request_argument=' + value
             }).done(function (data) {
                 var message = WebServiceStreamingResponse.decode(data);
                 var stream_id = message.stream_id;
-                //
-                //var messageReceivedCallback = new MessageReceiveCallbackFunction(event,
-                //    data, stream_id, streamingCallback);
-
                 _eventBus.on(Events.MESSAGE_RECEIVED, function (event, data) {
                     if (data.stream_id == stream_id) {
                         var decodedEvent = SimpleEventRecord.decode(data.data_base64);
@@ -74,7 +70,6 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
                     if (data.stream_id == stream_id) {
                         console.log("Service call completed");
                         streamingCallback.onCompleted();
-                        // remove listeners
                         _eventBus.off(this);
                     }
                 });
@@ -82,7 +77,6 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
                     if (data.stream_id == stream_id) {
                         console.log("Service call failed");
                         streamingCallback.onError(data.error_cause);
-                        // remove listeners
                         _eventBus.off(this);
                     }
                 });

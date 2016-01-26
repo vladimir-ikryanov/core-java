@@ -20,8 +20,11 @@
 
 package org.spine3.client.grpc.web.services;
 
+import org.spine3.client.grpc.web.RpcCallHandler;
+
 /**
  * An interface for all generated Rpc Services.
  */
 public interface RpcService {
+    RpcCallHandler getRpcCallHandler(String methodName);
 }

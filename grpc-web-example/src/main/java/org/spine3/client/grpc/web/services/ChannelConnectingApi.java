@@ -20,10 +20,10 @@
 
 package org.spine3.client.grpc.web.services;
 
-@SuppressWarnings("WeakerAccess") // We don't care, we'll remove this
-public class SimplePointlessRpcService implements RpcService {
+import org.spine3.client.grpc.web.ChannelConnectionCredential;
+import org.spine3.client.grpc.web.ChannelConnectionResponse;
 
-    public static RpcService newStub() {
-        return new SimplePointlessRpcService();
-    }
+@SuppressWarnings("WeakerAccess") // API
+public interface ChannelConnectingApi {
+    ChannelConnectionResponse connect(ChannelConnectionCredential request);
 }

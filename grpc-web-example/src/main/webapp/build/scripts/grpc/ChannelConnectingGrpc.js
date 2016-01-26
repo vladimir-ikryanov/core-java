@@ -32,8 +32,8 @@ define(['protobuf', 'constants', 'channelConnectionCredential', 'channelConnecti
 
                     $.ajax({
                         type: 'POST',
-                        url: Constants.ChannelConnectingPath,
-                        data: 'rpc_method_type=Connect&rpc_method_argument=' + value
+                        url: Constants.DispatcherPath,
+                        data: 'rpc_service_argument=ChannelConnectingGrpc&rpc_method_argument=Connect&rpc_request_argument=' + value
                     }).done(function (data) {
                         var convertedResult = channelConnectionResponse.decode(data);
                         resolve(convertedResult);
