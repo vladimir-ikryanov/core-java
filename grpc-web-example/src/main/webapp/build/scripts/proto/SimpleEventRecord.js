@@ -20,7 +20,7 @@
 
 define(['protobuf'], function (ProtoBuf) {
 
-    var SimpleEventRecord = ProtoBuf.loadProtoFile("/build/res/spine.client.grpc/web/web_service.proto")
+    var SimpleEventRecord = ProtoBuf.loadProtoFile("/build/res/spine.client.grpc/web/grpc_web.proto")
         .build("spine.client.grpc.web.SimpleEventRecord");
 
     return SimpleEventRecord;

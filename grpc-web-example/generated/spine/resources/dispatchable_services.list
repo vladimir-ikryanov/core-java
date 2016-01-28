@@ -1,0 +1,2 @@
+org.spine3.client.grpc.web.services.ClientServiceGrpc
+org.spine3.client.grpc.web.services.ChannelConnectingGrpc

@@ -24,55 +24,55 @@ package spine.client.grpc.web;
 option java_package="org.spine3.client.grpc.web";
 option java_multiple_files = true;
 
-message WebServiceStreamingResponse {
-    string stream_id = 1;
-}
-
-//message SuccessfulRpcCall {
-//
-//}
-
-message ChannelConnectionResponse {
-    string channel_id = 1;
-}
-
-message ChannelConnectionCredential {
-    string credential = 1;
-}
-
-//message VoidRpcArgument {
-//
-//}
-
-//message RpcResponse {
+//message WebServiceStreamingResponse {
 //    string stream_id = 1;
-//    oneof result {
-//        string data_base64 = 2;         // for onNext
-//        string completion_status = 3;   // for onComplete
-//        string error_cause = 4;         // for onError
-//    }
 //}
 
-message PhraseSaidEvent {
-    string phrase = 1;
+message SuccessfulRpcCall {
+
 }
 
-message SimpleCommandRequest {
-    string value = 1;
+//message ChannelConnectionResponse {
+//    string channel_id = 1;
+//}
+
+//message ChannelConnectionCredential {
+//    string credential = 1;
+//}
+
+message VoidRpcArgument {
+
 }
 
-message SimpleCommandResponse {
-    string value = 1;
+message RpcResponse {
+    string stream_id = 1;
+    oneof result {
+        string data_base64 = 2;         // for onNext
+        string completion_status = 3;   // for onComplete
+        string error_cause = 4;         // for onError
+    }
 }
 
-message SimpleEventRecord {
-    string value = 1;
-}
+//message PhraseSaidEvent {
+//    string phrase = 1;
+//}
 
-message SimpleClientRequest {
-    string client_id = 1;
-}
+//message SimpleCommandRequest {
+//    string value = 1;
+//}
 
-message SimpleConnection {
-    string channel_token = 1;
-}
+//message SimpleCommandResponse {
+//    string value = 1;
+//}
+
+//message SimpleEventRecord {
+//    string value = 1;
+//}
+
+//message SimpleClientRequest {
+//    string client_id = 1;
+//}
+
+//message SimpleConnection {
+//    string channel_token = 1;
+//}

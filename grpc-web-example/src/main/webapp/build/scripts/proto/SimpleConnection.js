@@ -20,7 +20,7 @@
 
 define(['protobuf'], function (ProtoBuf) {
 
-    var SimpleConnection = ProtoBuf.loadProtoFile("/build/res/spine.client.grpc/web/web_service.proto")
+    var SimpleConnection = ProtoBuf.loadProtoFile("/build/res/spine.client.grpc/web/grpc_web.proto")
         .build("spine.client.grpc.web.SimpleConnection");
 
     return SimpleConnection;

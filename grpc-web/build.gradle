@@ -1,0 +1,23 @@
+final def appEngineVersion = '1.9.30'
+
+buildscript {
+    dependencies {
+        classpath "org.spine3.tools:proto-lookup-plugin:1.0"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.spine3.tools.protolookup'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(path: ':core-java');
+
+    // Servlet API
+    compile 'javax.servlet:servlet-api:2.5'
+
+    compile "com.google.appengine:appengine-api-1.0-sdk:${appEngineVersion}"
+}

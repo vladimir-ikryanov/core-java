@@ -7,3 +7,5 @@ include ':grpc-web-example'
 project(':core-java').projectDir = "$rootDir/core-java" as File
 project(':core-java-sample').projectDir = "$rootDir/core-java-sample" as File
 project(':grpc-web-example').projectDir = "$rootDir/grpc-web-example" as File
+include 'grpc-web'
+

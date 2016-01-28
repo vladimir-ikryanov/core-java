@@ -33,3 +33,6 @@ credentials.properties
 # org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home/
 # -------
 gradle.properties
+
+# Include grpc-web-example files into repository
+!grpc-web-example/generated/spine

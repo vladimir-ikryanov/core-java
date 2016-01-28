@@ -1,4 +1,4 @@
-def appEngineVersion = '1.9.30'
+final def appEngineVersion = '1.9.30'
 
 buildscript {
     dependencies {
@@ -11,17 +11,14 @@ apply plugin: 'war'
 apply plugin: 'appengine'
 
 dependencies {
-    compile project(path: ':core-java');
-
     // Currently for StreamObserver interface only
     compile 'io.grpc:grpc-all:0.9.0'
-
-    // Servlet API
-    compile 'javax.servlet:servlet-api:2.5'
 
     // App Engine
     compile "com.google.appengine:appengine-api-1.0-sdk:${appEngineVersion}"
     appengineSdk "com.google.appengine:appengine-java-sdk:${appEngineVersion}"
+
+    compile project(':grpc-web')
 }
 
 apply plugin: 'org.spine3.tools.protolookup'
@@ -35,5 +32,13 @@ appengine {
     appcfg {
         noCookies = true
         oauth2 = true
+    }
+}
+
+sourceSets {
+    main {
+        java.srcDirs += ["generated/spine/java"]
+//        java.srcDirs = ["generated/main/java", "generated/spine/java", "src/main/java"]
+        resources.srcDirs += "generated/spine/resources"
     }
 }
