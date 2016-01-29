@@ -19,6 +19,6 @@
  */
 
 define(['protobuf'], function (ProtoBuf) {
-    return ProtoBuf.loadProtoFile("/build/res/spine.client.grpc/web/grpc_web.proto")
+    return ProtoBuf.loadProtoFile("/build/res/spine.client.grpc/web/web_service.proto")
         .build("spine.client.grpc.web.RpcResponse");
 });
