@@ -32,14 +32,6 @@ message SuccessfulRpcCall {
 
 }
 
-//message ChannelConnectionResponse {
-//    string channel_id = 1;
-//}
-
-//message ChannelConnectionCredential {
-//    string credential = 1;
-//}
-
 message VoidRpcArgument {
 
 }
@@ -52,27 +44,3 @@ message RpcResponse {
         string error_cause = 4;         // for onError
     }
 }
-
-//message PhraseSaidEvent {
-//    string phrase = 1;
-//}
-
-//message SimpleCommandRequest {
-//    string value = 1;
-//}
-
-//message SimpleCommandResponse {
-//    string value = 1;
-//}
-
-//message SimpleEventRecord {
-//    string value = 1;
-//}
-
-//message SimpleClientRequest {
-//    string client_id = 1;
-//}
-
-//message SimpleConnection {
-//    string channel_token = 1;
-//}

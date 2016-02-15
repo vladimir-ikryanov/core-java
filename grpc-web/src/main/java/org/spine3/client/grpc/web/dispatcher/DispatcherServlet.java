@@ -24,10 +24,9 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.client.grpc.web.RpcCallHandler;
+import org.spine3.client.grpc.web.services.RpcService;
 import org.spine3.client.grpc.web.SuccessfulRpcCall;
 import org.spine3.client.grpc.web.VoidRpcArgument;
-import org.spine3.client.grpc.web.services.RpcService;
-
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
@@ -41,13 +40,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.api.client.repackaged.com.google.common.base.Strings.isNullOrEmpty;
-
-//TODO:2016-01-18:mikhail.mikhaylov: Remove Utilities.
+import static java.lang.String.format;
 
 /**
  * Main GRPC endpoint.
  */
-//TODO:2016-01-15:mikhail.mikhaylov: Remove this @SuppressWarning after AbstracteviceWebServletRemoval.
 @SuppressWarnings({"DuplicateStringLiteralInspection", "Duplicates"})
 public class DispatcherServlet extends HttpServlet implements Dispatcher {
 
@@ -55,20 +52,58 @@ public class DispatcherServlet extends HttpServlet implements Dispatcher {
     private static final String PROTOBUF_PARSE_FROM_METHOD_NAME = "parseFrom";
     private static final String PROTO_MIME_TYPE = "application/x-protobuf";
 
+    private static final String RPC_SERVICE_ARGUMENT = "rpc_service_argument";
+    private static final String RPC_METHOD_ARGUMENT = "rpc_method_argument";
+    private static final String RPC_REQUEST_ARGUMENT = "rpc_request_argument";
+
+    private static final String INVALID_RPC_CALL_ARG = "Invalid RPC call argument:";
+
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private final Map<String, RpcService> registeredServices = new HashMap<>();
 
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
+    @Override
+    public void init() throws ServletException {
+        super.init();
+
+        final ServiceInitializer serviceInitializer = new ServiceInitializer();
+        serviceInitializer.initializeServices(this);
+
+        if (log().isInfoEnabled()) {
+            log().info("DispatcherServlet has ben set up, the number of services is: " +
+                    registeredServices.keySet().size());
+        }
+    }
+
+    @Override
+    public void registerService(Class<RpcService> clazz, RpcService service) {
+        // TODO:2016-01-18:mikhail.mikhaylov: Check if we should provide full name here.
+        // We can get a collision for a few services within different packagees, and
+        // full names can solve this problem/
+        // TODO:2016-01-18:mikhail.mikhaylov: Check if RpcService i enoght.
+        registeredServices.put(clazz.getSimpleName(), service);
+    }
+
+    @SuppressWarnings("RefusedBequest") // Servlet API
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        final String rpcServiceArg = req.getParameter(RPC_SERVICE_ARGUMENT);
+        final String rpcMethodArg = req.getParameter(RPC_METHOD_ARGUMENT);
+        final String rpcArgumentArg = req.getParameter(RPC_REQUEST_ARGUMENT);
+
+        final RpcService service = getRpcService(rpcServiceArg);
+        final RpcCallHandler handler = getRpcCallHandler(service, rpcMethodArg);
+        final Message callResult = invokeRpcMethod(handler, rpcArgumentArg);
+
+        write(resp, callResult);
     }
 
     private static RpcCallHandler getRpcCallHandler(RpcService service, String rpcMethodName) {
         if (isNullOrEmpty(rpcMethodName)) {
-            throw new IllegalArgumentException("Invalid rpcService argument.");
+            throw new IllegalArgumentException(format("%s empty method name.", INVALID_RPC_CALL_ARG));
         }
-        final RpcCallHandler rpcCallHandler = service.getRpcCallHandler(rpcMethodName);
+        final RpcCallHandler rpcCallHandler = service.obtainRpcCallHandler(rpcMethodName);
         if (rpcCallHandler == null) {
-            throw new IllegalStateException("No method handler found for argument.");
+            throw new IllegalStateException(format("No method handler found for rpc method '%s'.", rpcMethodName));
         }
         return rpcCallHandler;
     }
@@ -76,7 +111,7 @@ public class DispatcherServlet extends HttpServlet implements Dispatcher {
     @SuppressWarnings("unchecked")
     private static Message invokeRpcMethod(RpcCallHandler handler, String rpcMethodArgument) {
         if (handler.getParameterClass() != VoidRpcArgument.class && rpcMethodArgument == null) {
-            throw new IllegalArgumentException("Invalid RPC method argument.");
+            throw new IllegalArgumentException(format("%s empty method argument.", INVALID_RPC_CALL_ARG));
         }
 
         final Message rpcMethodCallResult;
@@ -127,63 +162,24 @@ public class DispatcherServlet extends HttpServlet implements Dispatcher {
         return LogSingleton.INSTANCE.value;
     }
 
-    @SuppressWarnings("RefusedBequest") // Servlet API
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final String rpcServiceArg = req.getParameter(Arguments.RPC_SERVICE_ARGUMENT);
-        final String rpcMethodArg = req.getParameter(Arguments.RPC_METHOD_ARGUMENT);
-        final String rpcArgumentArg = req.getParameter(Arguments.RPC_REQUEST_ARGUMENT);
-
-        final RpcService service = getRpcService(rpcServiceArg);
-        final RpcCallHandler handler = getRpcCallHandler(service, rpcMethodArg);
-        final Message callResult = invokeRpcMethod(handler, rpcArgumentArg);
-
-        write(resp, callResult);
-    }
-
-    @Override
-    public void init() throws ServletException {
-        super.init();
-
-        final ServiceInitializer serviceInitializer = new ServiceInitializer();
-        serviceInitializer.initializeServices(this);
-
-        if (log().isInfoEnabled()) {
-            log().info("DispatcherServlet has ben set up, the number of services is: " +
-                    registeredServices.keySet().size());
-        }
-    }
-
-    @Override
-    public void registerService(Class<RpcService> clazz, RpcService service) {
-        // TODO:2016-01-18:mikhail.mikhaylov: Check if we should provide full name here.
-        // We can get a collision for a few services within different packagees, and
-        // full names can solve this problem/
-        // TODO:2016-01-18:mikhail.mikhaylov: Check if RpcService i enoght.
-        registeredServices.put(clazz.getSimpleName(), service);
-    }
-
     private RpcService getRpcService(String rpcServiceName) {
         if (isNullOrEmpty(rpcServiceName)) {
-            throw new IllegalArgumentException("Invalid rpcService argument.");
+            throw new IllegalArgumentException(format("%s empty service name.", INVALID_RPC_CALL_ARG));
         }
         final RpcService service = registeredServices.get(rpcServiceName);
         if (service == null) {
-            throw new IllegalStateException("No service found for argument.");
+            throw new IllegalStateException(format("No service found for name '%s'.", rpcServiceName));
         }
         return service;
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(DispatcherServlet.class);
-    }
-
-    @SuppressWarnings("UtilityClass")
-    private static class Arguments {
-        private static final String RPC_SERVICE_ARGUMENT = "rpc_service_argument";
-        private static final String RPC_METHOD_ARGUMENT = "rpc_method_argument";
-        private static final String RPC_REQUEST_ARGUMENT = "rpc_request_argument";
     }
 }

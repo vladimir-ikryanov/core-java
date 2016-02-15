@@ -18,13 +18,13 @@ import java.util.*;
 public class ChannelServiceWrapper {
 
     // TODO:2016-01-15:mikhal.mikhaylov: Refactor protobuf completion representation.
-    private static final String STREAM_COMPLETION_STATUS = "Ok.";
+    private static final String STREAM_COMPLETION_STATUS = "OK.";
 
     private static final ChannelServiceWrapper instance = new ChannelServiceWrapper();
     private final ChannelService channelService;
     private final Map<Class<?>, ChannelIdConverter<?>> converters = new HashMap<>();
-    private List<String> openChannels = new ArrayList<>();
-    private Map<String, String> openStreams = new HashMap<>();
+    private final Collection<String> openChannels = new HashSet<>();
+    private final Map<String, String> openStreams = new HashMap<>();
 
     private ChannelServiceWrapper() {
         channelService = ChannelServiceFactory.getChannelService();
@@ -53,22 +53,9 @@ public class ChannelServiceWrapper {
      *
      * @param channelTokenId open channel tokenId.
      */
+    // TODO:2016-02-15:mikhail.mikhaylov: Implement client disconnecting signal.
     public void closeChannel(String channelTokenId) {
         openChannels.remove(channelTokenId);
-    }
-
-    /**
-     * Opens a stream within a channel.
-     * <p>
-     * Streams belong to channels, and before closing channel you should close all streams of this channel.
-     *
-     * @param channelId stream channel's tokenId
-     * @return streamId.
-     */
-    private String openStream(String channelId) {
-        final String randomId = UUID.randomUUID().toString();
-        openStreams.put(randomId, channelId);
-        return randomId;
     }
 
     /**
@@ -91,28 +78,6 @@ public class ChannelServiceWrapper {
     }
 
     /**
-     * Closes stream.
-     *
-     * @param streamId stream's id.
-     */
-    private void closeStream(String streamId) {
-        openStreams.remove(streamId);
-    }
-
-    /**
-     * Returns the Id of associated channel.
-     *
-     * @param streamId Id of channel's stream
-     * @return channel Id.
-     */
-    private String getStreamChannel(String streamId) {
-        if (!openStreams.containsKey(streamId)) {
-            throw new IllegalArgumentException("No open channel for such streamId: " + streamId);
-        }
-        return openStreams.get(streamId);
-    }
-
-    /**
      * Registers Converter for RPC method argument.
      * <p>
      * Converter retrieves Steam Id from method argument.
@@ -124,6 +89,7 @@ public class ChannelServiceWrapper {
         converters.put(forClass, converter);
     }
 
+    @SuppressWarnings("TypeMayBeWeakened") // We only send Messages.
     public void sendMessage(Message message, String streamId) {
         final String base64 = DatatypeConverter.printBase64Binary(message.toByteArray());
 
@@ -151,19 +117,58 @@ public class ChannelServiceWrapper {
         closeStream(streamId);
     }
 
+    /**
+     * Closes stream.
+     *
+     * @param streamId stream's id.
+     */
+    private void closeStream(String streamId) {
+        openStreams.remove(streamId);
+    }
+
+    /**
+     * Returns the Id of associated channel.
+     *
+     * @param streamId Id of channel's stream
+     * @return channel Id.
+     */
+    private String getStreamChannel(String streamId) {
+        if (!openStreams.containsKey(streamId)) {
+            throw new IllegalArgumentException("No open channel for such streamId: " + streamId);
+        }
+        return openStreams.get(streamId);
+    }
+
+    /**
+     * Opens a stream within a channel.
+     * <p>
+     * Streams belong to channels, and before closing channel you should close all streams of this channel.
+     *
+     * @param channelId stream channel's tokenId
+     * @return streamId.
+     */
+    private String openStream(String channelId) {
+        if (!openChannels.contains(channelId)) {
+            throw new ClosedChannelException(channelId);
+        }
+        final String randomId = UUID.randomUUID().toString();
+        openStreams.put(randomId, channelId);
+        return randomId;
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened") // We only send RpcResponses.
     private void sendMessage(String streamId, RpcResponse rpcResponse) {
         final String base64Response = DatatypeConverter.printBase64Binary(rpcResponse.toByteArray());
 
         channelService.sendMessage(new ChannelMessage(openStreams.get(streamId), base64Response));
     }
 
-    /**
-     * As we can define a service with any possible message as argument and channel id as result, we
-     * must know how to associate it's call's result with open channel.
-     *
-     * @param <T> RPC call argument
-     */
-    public interface ChannelIdConverter<T extends Message> {
-        String convert(T argument);
+    private static class ClosedChannelException extends RuntimeException {
+
+        private static final long serialVersionUID = 424251832827342426L;
+
+        /* protected */ ClosedChannelException(String channelId) {
+            super(String.format("You are trying to open stream for on closed channel with id %s.", channelId));
+        }
     }
 }

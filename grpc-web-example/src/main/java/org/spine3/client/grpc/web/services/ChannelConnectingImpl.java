@@ -24,6 +24,7 @@ import org.spine3.client.grpc.web.ChannelConnectionCredential;
 import org.spine3.client.grpc.web.ChannelConnectionResponse;
 import org.spine3.client.grpc.web.ChannelServiceWrapper;
 
+@SuppressWarnings("WeakerAccess")
 public class ChannelConnectingImpl extends ChannelConnectingGrpc.AbstractImpl {
     @Override
     public ChannelConnectionResponse connect(ChannelConnectionCredential request) {

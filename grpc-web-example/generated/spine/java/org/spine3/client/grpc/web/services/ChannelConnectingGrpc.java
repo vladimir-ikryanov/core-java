@@ -44,7 +44,7 @@ public abstract class ChannelConnectingGrpc implements RpcService, ChannelConnec
         }};
 
         @Override
-        public RpcCallHandler getRpcCallHandler(String method) {
+        public RpcCallHandler obtainRpcCallHandler(String method) {
             return handlers.get(method);
         }
 

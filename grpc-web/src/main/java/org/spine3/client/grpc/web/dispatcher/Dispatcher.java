@@ -23,10 +23,10 @@ package org.spine3.client.grpc.web.dispatcher;
 import org.spine3.client.grpc.web.services.RpcService;
 
 /**
- * Api interface for {@link DispatcherServlet}.
+ * API interface for {@link DispatcherServlet}.
  * <p/>
  * Provides an API for service registration.
  */
-interface Dispatcher {
+/* package */ interface Dispatcher {
     void registerService(Class<RpcService> clazz, RpcService service);
 }

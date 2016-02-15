@@ -37,16 +37,35 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import static java.lang.String.format;
+
 /**
- * Simple initializer for generated GRPC services.
+ * Simple initializer for generated gRPC services.
  * <p/>
  * Uses property files to get information about servies. Registers them for {@link DispatcherServlet}.
  */
-class ServiceInitializer {
+/* package */ class ServiceInitializer {
     private static final String DISPATCHABLE_SERVICES_FILE_PATH = "dispatchable_services.list";
+    private static final String NEW_STUB_METHOD_NAME = "newStub";
 
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
+    /* package */ void initializeServices(Dispatcher dispatcher) {
+        final List<String> classNames = readResources();
+        for (String className : classNames) {
+            try {
+                @SuppressWarnings("unchecked") // This should always be ok
+                final Class<RpcService> aClass = (Class<RpcService>) Class.forName(className);
+
+                final Method newStubMethod = aClass.getMethod(NEW_STUB_METHOD_NAME);
+                final RpcService methodResult = (RpcService) newStubMethod.invoke(null);
+                dispatcher.registerService(aClass, methodResult);
+            } catch (ClassNotFoundException e) {
+                error("Could not load class: " + className, e);
+            } catch (NoSuchMethodException e) {
+                error(format("Class does not have %s method: %s.", NEW_STUB_METHOD_NAME, className), e);
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                error(format("Could execute %s(): %s.", NEW_STUB_METHOD_NAME, className), e);
+            }
+        }
     }
 
     /**
@@ -80,45 +99,33 @@ class ServiceInitializer {
 
             reader.close();
         } catch (IOException e) {
-            if (log().isWarnEnabled()) {
-                log().warn("Failed to read file.", e);
-            }
+            error("Failed to read file.", e);
         } finally {
             IoUtil.closeSilently(inputStream);
         }
         return classNames;
     }
 
-    void initializeServices(Dispatcher dispatcher) {
-        final List<String> classNames = readResources();
-        for (String className : classNames) {
-            try {
-                @SuppressWarnings("unchecked") // This should always be ok
-                final Class<RpcService> aClass = (Class<RpcService>) Class.forName(className);
-
-                final Method newStubMethod = aClass.getMethod("newStub");
-                final RpcService methodResult = (RpcService) newStubMethod.invoke(null);
-                dispatcher.registerService(aClass, methodResult);
-            } catch (ClassNotFoundException e) {
-                if (log().isWarnEnabled()) {
-                    log().warn("Could not load class: " + className, e);
-                }
-            } catch (NoSuchMethodException e) {
-                if (log().isWarnEnabled()) {
-                    log().warn("Class does not have newStub() method: " + className, e);
-                }
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                if (log().isWarnEnabled()) {
-                    log().warn("Could execute newStub(): " + className, e);
-                }
-            }
+    private static void error(String message, Throwable throwable) {
+        final Logger log = LogSingleton.INSTANCE.value;
+        if (log.isErrorEnabled()) {
+            log.error(message, throwable);
         }
-
+        throw new ServiceInitializationException(message, throwable);
     }
 
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(ServiceInitializer.class);
+    }
+
+    private static class ServiceInitializationException extends RuntimeException {
+
+        private static final long serialVersionUID = 8000399024325706117L;
+
+        /* package */ ServiceInitializationException(String message, Throwable rootCause) {
+            super(message, rootCause);
+        }
     }
 }

@@ -17,30 +17,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.spine3.client.grpc.web;
 
 import com.google.protobuf.Message;
 
 /**
- * An interface which describes a single RPC endpoint for an RPC service.
+ * As we can define a service with any possible message as argument and channel id as result, we
+ * must know how to associate it's call's result with open channel.
  *
- * @param <PARAMETER> RPC call param
- * @param <REQUEST> RPC call result
+ * @param <T> RPC call argument
  */
-public interface RpcCallHandler<PARAMETER extends Message, REQUEST extends Message> {
-
-    /**
-     * Rpc Method Handler itself. Should be implemented manually.
-     *
-     * @param requestMessage Rpc Method Argument
-     * @return Rpc Method Result
-     */
-    REQUEST handle(PARAMETER requestMessage);
-
-    /**
-     * Returns Rpc Method Parameter class. Is implemented automatically with the generator.
-     *
-     * @return Class type instance
-     */
-    Class<PARAMETER> getParameterClass();
+public interface ChannelIdConverter<T extends Message> {
+    String convert(T argument);
 }

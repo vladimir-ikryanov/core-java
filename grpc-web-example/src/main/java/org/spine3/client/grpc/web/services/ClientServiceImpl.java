@@ -24,18 +24,21 @@ import io.grpc.stub.StreamObserver;
 import org.spine3.client.Connection;
 import org.spine3.client.grpc.web.*;
 
+@SuppressWarnings("WeakerAccess")
 public class ClientServiceImpl extends ClientServiceGrpc.AbstractImpl {
+
+    private static final int STREAMING_EVENTS_COUNT = 10;
 
     static {
         ChannelServiceWrapper.getInstance().registerStreamIdConverter(Connection.class,
-                new ChannelServiceWrapper.ChannelIdConverter<Connection>() {
+                new ChannelIdConverter<Connection>() {
                     @Override
                     public String convert(Connection argument) {
                         return argument.getChannel().getToken();
                     }
                 });
         ChannelServiceWrapper.getInstance().registerStreamIdConverter(SimpleConnection.class,
-                new ChannelServiceWrapper.ChannelIdConverter<SimpleConnection>() {
+                new ChannelIdConverter<SimpleConnection>() {
                     @Override
                     public String convert(SimpleConnection argument) {
                         return argument.getChannelToken();
@@ -51,7 +54,7 @@ public class ClientServiceImpl extends ClientServiceGrpc.AbstractImpl {
     @Override
     public void getEvents(SimpleConnection request, StreamObserver<SimpleEventRecord> resultObserver) {
         // we ignore request attribute here
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < STREAMING_EVENTS_COUNT; i++) {
             resultObserver.onNext(SimpleEventRecord.newBuilder().setValue("Event " + i).build());
         }
         resultObserver.onCompleted();

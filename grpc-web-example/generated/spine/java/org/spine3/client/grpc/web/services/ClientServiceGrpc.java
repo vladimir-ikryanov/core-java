@@ -45,7 +45,7 @@ public abstract class ClientServiceGrpc implements RpcService, ClientServiceApi 
             put("GetEvents", new GetEventsHandler(AbstractImpl.this));
         }};
 
-        public RpcCallHandler getRpcCallHandler(String method) {
+        public RpcCallHandler obtainRpcCallHandler(String method) {
             return handlers.get(method);
         }
 
