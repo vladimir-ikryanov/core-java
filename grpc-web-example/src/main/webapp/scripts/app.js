@@ -83,7 +83,7 @@ requirejs([
     $("#get_events").bind('click', function (e) {
         console.log("Testing Get Events..");
 
-        var argument = new SimpleConnection($("#app_credential").val());
+        var argument = new SimpleConnection($("#app_token").val());
 
         var streamingCallback = {};
         streamingCallback.onNext = function (event) {
