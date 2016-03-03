@@ -109,6 +109,16 @@ subprojects {
         generatedFilesBaseDir = GEN_ROOT_DIR
         protoc {
             artifact = project.PROTOBUF_DEPENDENCY
+//            path = '/usr/local/bin/protoc'
+        }
+        generateProtoTasks {
+            all().each { final task ->
+                task.builtins {
+                    js {
+
+                    }
+                }
+            }
         }
     }
 

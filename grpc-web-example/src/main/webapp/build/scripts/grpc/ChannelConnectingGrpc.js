@@ -18,24 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-define(['protobuf', 'constants', 'channelConnectionCredential', 'channelConnectionResponse'],
-    function (protobuf, constants, channelConnectionCredential, channelConnectionResponse) {
+define(['constants', 'protoLib'],
+    function (constants, protoLib) {
+
         var ChannelConnectingGrpc = function () {
         };
 
         ChannelConnectingGrpc.prototype.Connect = function (requestArgument) {
             return new Promise(function (resolve, reject) {
-                if (!requestArgument instanceof channelConnectionCredential) {
+                if (!requestArgument instanceof proto.spine.client.grpc.web.ChannelConnectionCredential) {
                     reject(new Error("Invalid argument."));
                 } else {
-                    var value = requestArgument.toBase64();
+                    var value = requestArgument.serializeBinary();
 
                     $.ajax({
                         type: 'POST',
                         url: Constants.DispatcherPath,
                         data: 'rpc_service_argument=ChannelConnectingGrpc&rpc_method_argument=Connect&rpc_request_argument=' + value
                     }).done(function (data) {
-                        var convertedResult = channelConnectionResponse.decode(data);
+                        var convertedResult = proto.spine.client.grpc.web.ChannelConnectionResponse.deserializeBinary(data);
                         resolve(convertedResult);
                     }).fail(function (error) {
                         reject(error);

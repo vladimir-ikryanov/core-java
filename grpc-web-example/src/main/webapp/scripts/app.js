@@ -1,45 +1,23 @@
 requirejs.config({
     baseUrl: 'scripts',
     paths: {
-        long: 'dependencies/long',
-        bytebuffer: 'dependencies/bytebuffer',
+        protoLib: '../build/scripts/proto/library',
+        googleProtobuf: 'dependencies/google-protobuf',
         jquery: 'dependencies/jquery-2.1.4',
-        protobuf: 'dependencies/protobuf',
         constants: 'common/Constants',
-        channelConnectionCredential: '../build/scripts/proto/ChannelConnectionCredential',
-        channelConnectionResponse: '../build/scripts/proto/ChannelConnectionResponse',
-        simpleCommandRequest: '../build/scripts/proto/SimpleCommandRequest',
-        simpleCommandResponse: '../build/scripts/proto/SimpleCommandResponse',
-        simpleClientRequest: '../build/scripts/proto/SimpleClientRequest',
-        simpleConnection: '../build/scripts/proto/SimpleConnection',
-        simpleEventRecord: '../build/scripts/proto/SimpleEventRecord',
+        events: "../build/scripts/common/Events",
         clientServiceGrpc: '../build/scripts/grpc/ClientServiceGrpc',
         channelConnectingGrpc: '../build/scripts/grpc/ChannelConnectingGrpc',
-        connectionService: "services/ConnectionService",
-        rpcResponse: "../build/scripts/proto/RpcResponse",
-        events: "../build/scripts/common/Events",
-        webServiceStreamingResponse: "../build/scripts/proto/WebServiceStreamingResponse"
+        connectionService: "services/ConnectionService"
     }
 });
 
 requirejs([
-    'jquery',
-    'long',
-    'bytebuffer',
-    'protobuf',
-    'constants',
-    'channelConnectionCredential',
-    'channelConnectionResponse',
-    'simpleCommandRequest',
-    'simpleCommandResponse',
-    'simpleClientRequest',
-    'simpleConnection',
-    'clientServiceGrpc',
-    'channelConnectingGrpc',
-    'connectionService'], function ($, long, byteBuffer, protoBuf, constants,
-                                    ChannelConnectionCredential, ChannelConnectionResponse,
-                                    SimpleCommandRequest, SimpleCommandResponse, SimpleClientRequest,
-                                    SimpleConnection, ClientServiceGrpc, ChannelConnectingGrpc, ConnectionService) {
+    'jquery', 'googleProtobuf', 'protoLib',
+    'clientServiceGrpc', 'channelConnectingGrpc',
+    'connectionService'], function ($, googleProtobuf, protoLib,
+                                    ClientServiceGrpc, ChannelConnectingGrpc,
+                                    ConnectionService) {
     console.info('Module loaded');
 
     var eventBus = $(".event-bus");
@@ -63,7 +41,9 @@ requirejs([
     $("#broadcast").bind('click', function (e) {
         console.log('Posting command...');
 
-        var commandRequest = new SimpleCommandRequest("DummyRequestString");
+        var SimpleCommandRequest = proto.spine.client.grpc.web.SimpleCommandRequest;
+        var commandRequest = new SimpleCommandRequest();
+        commandRequest.setValue("DummyRequestString");
 
         var broadcastPromise = clientService.Post(commandRequest);
 
@@ -83,7 +63,8 @@ requirejs([
     $("#get_events").bind('click', function (e) {
         console.log("Testing Get Events..");
 
-        var argument = new SimpleConnection($("#app_token").val());
+        var argument = new proto.spine.client.grpc.web.SimpleConnection();
+        argument.setChannelToken($("#app_token").val());
 
         var streamingCallback = {};
         streamingCallback.onNext = function (event) {

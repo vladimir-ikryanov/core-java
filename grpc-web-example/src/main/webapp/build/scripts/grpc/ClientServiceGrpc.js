@@ -18,10 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
-        'simpleCommandRequest', 'simpleCommandResponse', 'events', 'webServiceStreamingResponse', 'simpleEventRecord'],
-    function (protobuf, constants, clientRequest, simpleConnection, commandRequest, commandResponse, events,
-              WebServiceStreamingResponse, SimpleEventRecord) {
+define(['protoLib',
+        'constants',
+        'events'],
+    function (protoLib,
+              constants,
+              events) {
         var _eventBus;
 
         var ClientServiceGrpc = function (eventBus) {
@@ -29,18 +31,20 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
         };
 
         ClientServiceGrpc.prototype.Post = function (requestArgument) {
+            var argumentType = proto.spine.client.grpc.web.SimpleCommandRequest;
+
             return new Promise(function (resolve, reject) {
-                if (!requestArgument instanceof commandRequest) {
+                if (!requestArgument instanceof argumentType) {
                     reject(new Error("Invalid argument."));
                 } else {
-                    var value = requestArgument.toBase64();
+                    var value = requestArgument.serializeBinary();
 
                     $.ajax({
                         type: 'POST',
                         url: Constants.DispatcherPath,
                         data: 'rpc_service_argument=ClientServiceGrpc&rpc_method_argument=Post&rpc_request_argument=' + value
                     }).done(function (data) {
-                        var convertedResult = commandResponse.decode(data);
+                        var convertedResult = proto.spine.client.grpc.web.SimpleCommandResponse.deserializeBinary(data);
                         resolve(convertedResult);
                     }).fail(function (error) {
                         reject(error);
@@ -50,33 +54,33 @@ define(['protobuf', 'constants', 'simpleClientRequest', 'simpleConnection',
         };
 
         ClientServiceGrpc.prototype.GetEvents = function (requestArgument, streamingCallback) {
-            var value = requestArgument.toBase64();
+            var value = requestArgument.serializeBinary();
 
             $.ajax({
                 type: 'POST',
                 url: Constants.DispatcherPath,
                 data: 'rpc_service_argument=ClientServiceGrpc&rpc_method_argument=GetEvents&rpc_request_argument=' + value
             }).done(function (data) {
-                var message = WebServiceStreamingResponse.decode(data);
-                var stream_id = message.stream_id;
+                var message = proto.spine.client.grpc.web.WebServiceStreamingResponse.deserializeBinary(data);
+                var stream_id = message.getStreamId();
                 _eventBus.on(Events.MESSAGE_RECEIVED, function (event, data) {
-                    if (data.stream_id == stream_id) {
-                        var decodedEvent = SimpleEventRecord.decode(data.data_base64);
-                        console.log("Service got proper message: {}", decodedEvent);
+                    if (data.getStreamId() == stream_id) {
+                        var decodedEvent = proto.spine.client.grpc.web.SimpleEventRecord.deserializeBinary(data.getDataBase64());
+                        console.log("Service got proper message: ", decodedEvent.getValue(), decodedEvent);
                         streamingCallback.onNext(decodedEvent);
                     }
                 });
                 _eventBus.on(Events.CALL_COMPLETED, function (event, data) {
-                    if (data.stream_id == stream_id) {
+                    if (data.getStreamId() == stream_id) {
                         console.log("Service call completed");
                         streamingCallback.onCompleted();
                         _eventBus.off(this);
                     }
                 });
                 _eventBus.on(Events.CALL_FAILED, function (event, data) {
-                    if (data.stream_id == stream_id) {
+                    if (data.getStreamId() == stream_id) {
                         console.log("Service call failed");
-                        streamingCallback.onError(data.error_cause);
+                        streamingCallback.onError(data.getErrorCause());
                         _eventBus.off(this);
                     }
                 });

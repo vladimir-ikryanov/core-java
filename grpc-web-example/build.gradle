@@ -19,6 +19,9 @@ dependencies {
     appengineSdk "com.google.appengine:appengine-java-sdk:${appEngineVersion}"
 
     compile project(':grpc-web')
+
+    protobuf project(":core-java")
+    protobuf "com.google.protobuf:protobuf-java:3.0.0-beta-2"
 }
 
 apply plugin: 'org.spine3.tools.protolookup'
@@ -42,3 +45,43 @@ sourceSets {
         resources.srcDirs += "generated/spine/resources"
     }
 }
+
+final def mergingProtos = new ArrayList<String>();
+
+// This should become a part of a plugin
+task mergeProtos() {
+    final def extractedProtosDir = "$projectDir/build/extracted-protos/main";
+    final def srcProtoDir = "$projectDir/src/main/proto";
+
+    // DRY
+
+    mergingProtos.clear();
+
+    mergingProtos.addAll(["--proto_path=/Users/mmikhaylov/Code/core-java/grpc-web-example", "--js_out=library=library776492,binary:."] as String[]);
+
+    final def extractedProtosRoot = new File(extractedProtosDir);
+    fileTree(extractedProtosRoot).each {
+        if (it.name.endsWith(".proto")) {
+            mergingProtos.add(it.absolutePath.substring(78));
+        }
+    }
+
+    final def srcProtoRoot = new File(srcProtoDir);
+    fileTree(srcProtoRoot).each {
+        if (it.name.endsWith(".proto")) {
+            mergingProtos.add(it.absolutePath.substring(65));
+        }
+    }
+
+}
+
+task executePbjs(type: Exec, dependsOn: "mergeProtos") {
+    executable "protoc"
+    args mergingProtos
+//    args "${mergingProtos.get(0)}", mergingProtos.get(1), "-t=proto", "-s=proto", "-p=$projectDir/build/extracted-protos/main",
+//            "-p=$projectDir/src/main/proto", "-l"
+//    args "-t=js", mergingProtos.join(" "), ">/Users/mmikhaylov/__TEMP/out.proto"
+//    standardOutput = new FileOutputStream(new File("out.file"))
+}
+
+//task(":executePbjs").dependsOn(":mergeProtos")

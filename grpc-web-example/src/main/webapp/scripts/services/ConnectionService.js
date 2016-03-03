@@ -18,10 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-define(['protobuf', 'constants', 'channelConnectingGrpc',
-        'channelConnectionCredential', 'rpcResponse', 'events'],
-    function (protobuf, constants, ChannelConnectingGrpc,
-              ChannelConnectionCredential, RpcResponse, events) {
+define(['protoLib', 'constants', 'channelConnectingGrpc'],
+    function (protoLib, constants, ChannelConnectingGrpc) {
         var channelConnectingGrpc = new ChannelConnectingGrpc();
         var _eventBus;
 
@@ -32,14 +30,15 @@ define(['protobuf', 'constants', 'channelConnectingGrpc',
         ConnectionService.prototype.Connect = function (credentialString) {
             //get credential somewhere
 
-            var credential = new ChannelConnectionCredential(credentialString);
+            var credential = new proto.spine.client.grpc.web.ChannelConnectionCredential();
+            credential.setCredential(credentialString);
             var connectionPromise = channelConnectingGrpc.Connect(credential);
 
             connectionPromise.then(function (result) {
-                console.log("App bound. Received channelId: " + result.channel_id);
-                $("#app_token").val(result.channel_id);
+                console.log("App bound. Received channelId: " + result.getChannelId());
+                $("#app_token").val(result.getChannelId());
 
-                connect(result.channel_id, _eventBus, RpcResponse);
+                connect(result.getChannelId(), _eventBus, proto.spine.client.grpc.web.RpcResponse);
             }, function (reason) {
                 console.log("Could not bind app: {}.", reason)
             });
@@ -60,15 +59,15 @@ function connect(token, eventBus, RpcResponse) {
     socket.onmessage = function (data) {
         console.log("Message received: {}.", data);
 
-        var response = RpcResponse.decode(data.data);
-        switch (response.result) {
-            case "data_base64":
+        var response = RpcResponse.deserializeBinary(data.data);
+        switch (response.getResultCase()) {
+            case RpcResponse.ResultCase.DATA_BASE64:
                 eventBus.trigger(Events.MESSAGE_RECEIVED, response);
                 break;
-            case "completion_status":
+            case RpcResponse.ResultCase.COMPLETION_STATUS:
                 eventBus.trigger(Events.CALL_COMPLETED, response);
                 break;
-            case "error_cause":
+            case RpcResponse.ResultCase.ERROR_CAUSE:
                 eventBus.trigger(Events.CALL_FAILED, response);
                 break;
         }

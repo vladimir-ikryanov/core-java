@@ -20,6 +20,7 @@
 
 package org.spine3.client.grpc.web.dispatcher;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,8 @@ import org.spine3.client.grpc.web.RpcCallHandler;
 import org.spine3.client.grpc.web.services.RpcService;
 import org.spine3.client.grpc.web.SuccessfulRpcCall;
 import org.spine3.client.grpc.web.VoidRpcArgument;
+import org.spine3.client.grpc.web.util.ProtobufRequestReaderUtil;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
@@ -121,7 +124,8 @@ public class DispatcherServlet extends HttpServlet implements Dispatcher {
 
             rpcMethodCallResult = SuccessfulRpcCall.getDefaultInstance();
         } else {
-            final byte[] bytes = DatatypeConverter.parseBase64Binary(rpcMethodArgument);
+
+            final byte[] bytes = ProtobufRequestReaderUtil.readData(rpcMethodArgument);
 
             Message messageArgument = null;
             try {
@@ -141,7 +145,8 @@ public class DispatcherServlet extends HttpServlet implements Dispatcher {
     private static void write(ServletResponse response, Message message) {
         final byte[] serializedMsg = message.toByteArray();
 
-        final String base64 = DatatypeConverter.printBase64Binary(serializedMsg);
+//        final String stringMessage = ProtobufRequestReaderUtil.writeData(serializedMsg);
+        final String stringMessage = DatatypeConverter.printBase64Binary(serializedMsg);
 
         response.setContentType(PROTO_MIME_TYPE);
         response.setCharacterEncoding(null);
@@ -149,7 +154,7 @@ public class DispatcherServlet extends HttpServlet implements Dispatcher {
         final PrintWriter writer;
         try {
             writer = response.getWriter();
-            writer.write(base64);
+            writer.write(stringMessage);
 
             writer.flush();
             writer.close();
