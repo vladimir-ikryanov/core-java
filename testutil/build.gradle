@@ -2,7 +2,7 @@
 dependencies {
     // Depend on JUnit in the production part of the code, as this module exposes testing utilities
     // that are based on JUnit.
-    compile group: 'junit', name: 'junit', version: jUnitVersion
+    compile group: 'org.junit.platform', name: 'junit-platform-commons', version: jUnitPlatformVersion
 
     compile project(path: ':client')
 }
