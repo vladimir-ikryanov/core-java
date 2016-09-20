@@ -6,7 +6,8 @@ ext {
     protobufDependency = "com.google.protobuf:protoc:${protobufVersion}"
     gRpcVersion = '1.0.0-pre2'
     slf4JVersion = '1.7.21'
-    jUnitPlatformVersion = '1.0.0-M2'
+    jUnitPlatformVersion = '5.0.0-M2'
+    jUnitVintageVersion = '4.12.0-M2'
 
     spineProtobufPluginId = 'org.spine3.tools.protobuf-plugin'
     publishPlugin = "$projectDir/gradle/plugins/publish.gradle"
@@ -97,9 +98,9 @@ subprojects {
 
         //Use jdk14 bindings for test purposes only.
         testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: slf4JVersion
-        testCompile(group: 'org.junit.platform', name: 'junit-platform-common', version: jUnitPlatformVersion) {
-            exclude(module: 'hamcrest-core')
-        }
+        testCompile(group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jUnitPlatformVersion)
+        testCompile(group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jUnitPlatformVersion)
+        testCompile(group: 'org.junit.vintage', name: 'junit-vintage-engine', version: jUnitVintageVersion)
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
     }

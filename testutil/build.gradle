@@ -2,7 +2,9 @@
 dependencies {
     // Depend on JUnit in the production part of the code, as this module exposes testing utilities
     // that are based on JUnit.
-    compile group: 'org.junit.platform', name: 'junit-platform-commons', version: jUnitPlatformVersion
+    compile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jUnitPlatformVersion
+    compile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jUnitPlatformVersion
+    compile group: 'org.junit.vintage', name: 'junit-vintage-engine', version: jUnitVintageVersion
 
     compile project(path: ':client')
 }
