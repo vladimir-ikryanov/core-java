@@ -23,7 +23,6 @@ package org.spine3.server.stand;
 
 import com.google.protobuf.Any;
 import io.netty.util.internal.ConcurrentSet;
-import org.junit.Assert;
 import org.junit.jupiter.api.Executable;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -42,6 +41,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.expectThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,7 +79,7 @@ public class StandFunnelShould {
                                                       .setStand(stand)
                                                       .setExecutor(executor)
                                                       .build();
-        Assert.assertNotNull(funnel);
+        assertNotNull(funnel);
     }
 
     @Test
@@ -88,7 +89,7 @@ public class StandFunnelShould {
         final StandFunnel funnelForBusyStand = StandFunnel.newBuilder()
                                                           .setStand(stand)
                                                           .build();
-        Assert.assertNotNull(funnelForBusyStand);
+        assertNotNull(funnelForBusyStand);
     }
 
     @Test
@@ -123,7 +124,7 @@ public class StandFunnelShould {
                                                        .setExecutor(executor);
 
         final StandFunnel standFunnel = builder.build();
-        Assert.assertNotNull(standFunnel);
+        assertNotNull(standFunnel);
 
         final Any someState = Any.getDefaultInstance();
         final Object someId = new Object();
@@ -291,7 +292,7 @@ public class StandFunnelShould {
             @Override
             public void run() {
                 final String threadName = Thread.currentThread().getName();
-                Assert.assertFalse(threadInvocationRegistry.contains(threadName));
+                assertFalse(threadInvocationRegistry.contains(threadName));
 
                 standFunnel.post(new Object(), Any.getDefaultInstance());
 
@@ -305,7 +306,7 @@ public class StandFunnelShould {
 
         executor.awaitTermination(threadExecutionMaxAwaitSeconds, TimeUnit.SECONDS);
 
-        Assert.assertEquals(threadInvocationRegistry.size(), threadsCount);
+        assertEquals(threadInvocationRegistry.size(), threadsCount);
 
     }
 
