@@ -24,7 +24,8 @@ package org.spine3.server.stand;
 import com.google.protobuf.Any;
 import io.netty.util.internal.ConcurrentSet;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Executable;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
@@ -41,18 +42,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.expectThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("ThrowableResultOfMethodCallIgnored") // Assertions.expectThrows returns the caught exception.
 public class StandFunnelShould {
 
     // **** Positive scenarios (unit) ****
@@ -63,7 +66,7 @@ public class StandFunnelShould {
         final StandFunnel.Builder builder = StandFunnel.newBuilder()
                                                        .setStand(stand);
         final StandFunnel standFunnel = builder.build();
-        Assert.assertNotNull(standFunnel);
+        assertNotNull(standFunnel);
     }
 
     @Test
@@ -133,19 +136,29 @@ public class StandFunnelShould {
     // **** Negative scenarios (unit) ****
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Test(expected = NullPointerException.class)
+    @Test
     public void fail_to_initialize_with_improper_stand() {
-        @SuppressWarnings("ConstantConditions") // null is marked as improper with this warning
-        final StandFunnel.Builder builder = StandFunnel.newBuilder().setStand(null);
+        expectThrows(NullPointerException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                @SuppressWarnings("ConstantConditions") // null is marked as improper with this warning
+                final StandFunnel.Builder builder = StandFunnel.newBuilder().setStand(null);
 
-        builder.build();
+                builder.build();
+            }
+        });
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void fail_to_initialize_from_empty_builder() {
-        final StandFunnel.Builder builder = StandFunnel.newBuilder();
-        builder.build();
+        expectThrows(IllegalStateException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                final StandFunnel.Builder builder = StandFunnel.newBuilder();
+                builder.build();
+            }
+        });
     }
 
     // **** Integration scenarios (<source> -> StandFunnel -> Mock Stand) ****
