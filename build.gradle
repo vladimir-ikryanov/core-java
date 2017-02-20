@@ -223,7 +223,7 @@ subprojects {
         outputFormats = ['XML', 'HTML']
         testSourceSets = [sourceSets.test]
         mainSourceSets = [sourceSets.main]
-        verbose = true
+        // verbose = true       // uncomment this to receive a full output.
     }
 
     task sourceJar(type: Jar) {
