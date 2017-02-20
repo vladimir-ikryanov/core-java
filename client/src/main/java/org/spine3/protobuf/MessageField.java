@@ -41,6 +41,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
 public abstract class MessageField {
 
     /** The prefix of generated getter methods for fields. */
+    @SuppressWarnings("DuplicateStringLiteralInspection")   // avoid cross-package dependency.
     private static final String GETTER_METHOD_PREFIX = "get";
 
     /** By convention underscore is used for separating words in field names of Protobuf messages. */
