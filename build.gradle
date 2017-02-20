@@ -50,6 +50,9 @@ buildscript {
                                              version: spineProtobufPluginVersion
                                             //, changing: true // Uncomment this if you want the dependency to be
                                             // fetched on each build, but offline builds will not be available then.
+
+        // mutation testing setup (http://gradle-pitest-plugin.solidsoft.info).
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.11'
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
@@ -102,6 +105,9 @@ subprojects {
 
     apply plugin: 'java'
     apply plugin: 'com.google.protobuf'
+
+    // mutation testing task.
+    apply plugin: "info.solidsoft.pitest"
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -208,6 +214,16 @@ subprojects {
                 }
             }
         }
+    }
+
+    // Configuration for the PIT mutation testing library.
+    pitest {
+        targetClasses = ['org.spine3.*']
+        threads = 4
+        outputFormats = ['XML', 'HTML']
+        testSourceSets = [sourceSets.test]
+        mainSourceSets = [sourceSets.main]
+        verbose = true
     }
 
     task sourceJar(type: Jar) {

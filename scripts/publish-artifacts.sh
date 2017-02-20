@@ -8,13 +8,21 @@
 
 echo " -- PUBLISHING: current branch is $TRAVIS_BRANCH."
 
-if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+# `TRAVIS_EVENT_TYPE` with the `cron` value is a marker of a NIGHTLY build.
+# See `./scripts/build.sh` for more details.
+# Artifact publishing is now disabled for the NIGHTLY builds.
+
+if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_EVENT_TYPE" != 'cron' ]; then
     echo " ------ Publishing the artifacts to the repository..."
     openssl aes-256-cbc -K $encrypted_0f12c1faf1fc_key -iv $encrypted_0f12c1faf1fc_iv -in credentials.properties.enc -out credentials.properties -d
     ./gradlew publish -x test
     echo " ------ Artifacts published."
 else
-    echo " ------ Publishing is DISABLED for the current branch."
+    if [ "$TRAVIS_EVENT_TYPE" == 'cron' ]
+        echo " ------ Publishing is DISABLED for the NIGHTLY build."
+    else
+        echo " ------ Publishing is DISABLED for the current branch."
+    fi
 fi
 
 echo " -- PUBLISHING: completed."
