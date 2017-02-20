@@ -7,13 +7,12 @@
 # the `TRAVIS_EVENT_TYPE` environment variable is checked for `cron` value
 # (see https://docs.travis-ci.com/user/cron-jobs/ for more details).
 
-if [ "$TRAVIS_EVENT_TYPE" == 'cron' ] then
+if [ "$TRAVIS_EVENT_TYPE" == 'cron' ]; then
     echo " -- Build type: NIGHTLY."
 
     # Invoke mutation testing task based on PIT library.
     # It can take some time to complete, so run it only in NIGHTLY mode.
     ./gradlew pitest
-
 else
     echo " -- Build type: REGULAR."
 
