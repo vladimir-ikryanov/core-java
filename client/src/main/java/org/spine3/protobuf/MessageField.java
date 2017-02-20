@@ -50,7 +50,7 @@ public abstract class MessageField {
     private final int index;
 
     /** A map from message class to a getter method of the corresponding Java class. */
-    private static final Map<Class<? extends Message>, Method> accessors = Maps.newConcurrentMap();
+    private final Map<Class<? extends Message>, Method> accessors = Maps.newConcurrentMap();
 
     /**
      * Creates an instance for the field with the passed number.
