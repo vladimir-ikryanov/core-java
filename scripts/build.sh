@@ -12,7 +12,7 @@ if [ "$TRAVIS_EVENT_TYPE" == 'cron' ]; then
 
     # Invoke mutation testing task based on PIT library.
     # It can take some time to complete, so run it only in NIGHTLY mode.
-    ./gradlew pitest
+    ./gradlew pitest --quiet
 else
     echo " -- Build type: REGULAR."
 
