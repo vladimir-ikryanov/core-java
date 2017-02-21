@@ -230,6 +230,7 @@ subprojects {
         outputFormats = ['XML', 'HTML']
         testSourceSets = [sourceSets.test]
         mainSourceSets = [sourceSets.main]
+        jvmArgs = ['-Djava.util.logging.config.file=./scripts/test-logging.properties']
         // verbose = true       // uncomment this to receive a full output.
     }
 
