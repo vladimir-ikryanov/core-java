@@ -146,7 +146,9 @@ subprojects {
 
         //Using the `toolbox` while using JUnit 4 in order to compose test suites by category.
         //To be reviewed after the migration to Java 8.
-        testCompile group: 'com.googlecode.junit-toolbox', name: 'junit-toolbox', version: "2.2"
+        //
+        // `1.xx` is a `junit-toolbox` branch which is compatible with pre-Java8 environments.
+        testCompile group: 'com.googlecode.junit-toolbox', name: 'junit-toolbox', version: "1.10"
     }
 
     sourceSets {
