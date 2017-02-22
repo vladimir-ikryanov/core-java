@@ -34,5 +34,5 @@ import org.spine3.test.Tests;
 @RunWith(WildcardPatternSuite.class)
 @SuiteClasses(Tests.TEST_CLASSES_PATTERN)
 @ExcludeCategories({SlowTest.class})
-public class ServerFastTests {
+public class ClientFastTests {
 }

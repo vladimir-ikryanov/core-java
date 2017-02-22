@@ -25,6 +25,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.spine3.base.Command;
 import org.spine3.base.Commands;
 import org.spine3.client.CommandFactory;
@@ -65,6 +66,7 @@ public class CommandTestShould {
         commandTest = new TestCommandTest();
     }
 
+    @Category(SlowTest.class)   // 400 ms average run time.
     @Test
     public void initialize_with_default_CommandFactory_and_produce_commands() {
         createAndAssertCommand(commandTest);

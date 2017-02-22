@@ -30,10 +30,12 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.test.NullToleranceTest;
+import org.spine3.test.SlowTest;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.commands.TestCommand;
 
@@ -100,6 +102,7 @@ public class CommandsShould {
         assertFalse(idToString(id).isEmpty());
     }
 
+    @Category(SlowTest.class)   // 900 ms average run time.
     @Test
     public void create_command() {
         final Command command = Commands.createCommand(stringValue, CommandContext.getDefaultInstance());
@@ -116,6 +119,7 @@ public class CommandsShould {
         assertEquals(msg, command.getMessage());
     }
 
+    @Category(SlowTest.class)   // 300 ms average run time.
     @Test
     public void extract_message_from_command() {
         final StringValue message = newStringValue("extract_message_from_command");

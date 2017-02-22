@@ -57,13 +57,6 @@ buildscript {
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
     })
-
-    // Suppress the test log output by lowering its level.
-    //
-    // The build can be started with `--quiet` flag, and the output won't pollute the CI server log.
-    //
-    logging.captureStandardOutput LogLevel.DEBUG
-    logging.captureStandardError LogLevel.DEBUG
 }
 
 allprojects {
@@ -234,6 +227,7 @@ subprojects {
         outputFormats = ['XML', 'HTML']
         testSourceSets = [sourceSets.test]
         mainSourceSets = [sourceSets.main]
+        excludedGroups = ['SlowTest']
         jvmArgs = ['-Djava.util.logging.config.file=./scripts/test-logging.properties']
         // verbose = true       // uncomment this to receive a full output.
     }

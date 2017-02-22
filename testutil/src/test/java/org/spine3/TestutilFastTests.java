@@ -27,12 +27,10 @@ import org.spine3.test.SlowTest;
 import org.spine3.test.Tests;
 
 /**
- * A test suite which includes only the fast-running tests.
- *
  * @author Alex Tymchenko
  */
 @RunWith(WildcardPatternSuite.class)
 @SuiteClasses(Tests.TEST_CLASSES_PATTERN)
 @ExcludeCategories({SlowTest.class})
-public class ServerFastTests {
+public class TestutilFastTests {
 }

@@ -66,6 +66,7 @@ public class MessagesShould {
         Messages.toJson(Tests.<Message>nullRef());
     }
 
+    @Category(SlowTest.class)   // 300 ms average run time.
     @Test
     public void print_to_json() {
         final StringValue value = newStringValue("print_to_json");

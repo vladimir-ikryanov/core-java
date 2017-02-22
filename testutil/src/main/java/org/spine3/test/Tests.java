@@ -47,6 +47,15 @@ import static org.junit.Assert.assertEquals;
  */
 public class Tests {
 
+    /**
+     * Supplies a pattern for the test classes.
+     *
+     * <p>Used for test suites creation.
+     *
+     * <p>Has to be a {@code String} constant to conform the JUnit annotation contract.
+     */
+    public static final String TEST_CLASSES_PATTERN = "**/*Should.class";
+
     private Tests() {}
 
     /**
