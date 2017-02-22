@@ -23,9 +23,11 @@ package org.spine3.server.command;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.protobuf.Durations;
+import org.spine3.test.SlowTest;
 
 import java.util.List;
 
@@ -102,6 +104,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         }
     }
 
+    @Category(SlowTest.class)   // 200 ms average run time.
     @Test
     public void reschedule_commands_from_storage_in_parallel_on_build_if_thread_spawning_allowed() {
         final String mainThreadName = Thread.currentThread().getName();

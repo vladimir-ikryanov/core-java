@@ -33,7 +33,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.spine3.test.NullToleranceTest;
+import org.spine3.test.SlowTest;
 import org.spine3.test.Tests;
 import org.spine3.test.messages.MessageWithStringValue;
 import org.spine3.test.messages.TestEnum;
@@ -71,6 +73,7 @@ public class MessagesShould {
                             .isEmpty());
     }
 
+    @Category(SlowTest.class)   // 700 ms average run time.
     @Test
     public void build_JsonFormat_registry_for_known_types() {
         final JsonFormat.TypeRegistry typeRegistry = Messages.forKnownTypes();

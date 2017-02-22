@@ -25,6 +25,8 @@ import io.grpc.ServerServiceDefinition;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.spine3.test.SlowTest;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -108,8 +110,11 @@ public class GrpcContainerShould {
         assertNotNull(container);
     }
 
+    @Category(SlowTest.class)   // 1300 ms average run time.
     @Test
-    public void stop_properly_upon_application_shutdown() throws NoSuchFieldException, IllegalAccessException, IOException {
+    public void stop_properly_upon_application_shutdown() throws NoSuchFieldException,
+                                                                 IllegalAccessException,
+                                                                 IOException {
         final Class<Runtime> runtimeClass = Runtime.class;
         // Field signature: private static Runtime currentRuntime
         // Origin class: {@code java.lang.Runtime}.
@@ -141,6 +146,7 @@ public class GrpcContainerShould {
         fail("Exception must be thrown.");
     }
 
+    @Category(SlowTest.class)   // 1000ms average run time.
     @Test
     public void await_termination() throws IOException, InterruptedException {
         grpcContainer.start();

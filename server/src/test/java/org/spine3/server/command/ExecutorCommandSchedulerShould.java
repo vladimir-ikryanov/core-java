@@ -25,10 +25,12 @@ import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
+import org.spine3.test.SlowTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -68,6 +70,7 @@ public class ExecutorCommandSchedulerShould {
         scheduler.shutdown();
     }
 
+    @Category(SlowTest.class)   // 1100 ms average run time.
     @Test
     public void schedule_command_if_delay_is_set() {
         final Command cmdPrimary = Commands.createCommand(Given.CommandMessage.createProjectMessage(), context);
@@ -82,6 +85,7 @@ public class ExecutorCommandSchedulerShould {
         assertEquals(expectedCmd, actualCmd);
     }
 
+    @Category(SlowTest.class)   // 1100 ms average run time.
     @Test
     public void not_schedule_command_with_same_id_twice() {
         final String id = newUuid();

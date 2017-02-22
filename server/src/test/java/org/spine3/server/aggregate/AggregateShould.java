@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -35,6 +36,7 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
 import org.spine3.server.type.CommandClass;
+import org.spine3.test.SlowTest;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -420,6 +422,7 @@ public class AggregateShould {
                                            .getNumber());
     }
 
+    @Category(SlowTest.class)   // 320 ms average run time.
     @Test
     public void record_modification_timestamp() throws InterruptedException {
         final Timestamp start = aggregate.whenModified();

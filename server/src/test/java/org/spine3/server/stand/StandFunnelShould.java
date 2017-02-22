@@ -25,6 +25,7 @@ import com.google.protobuf.StringValue;
 import io.netty.util.internal.ConcurrentSet;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentMatchers;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
@@ -36,6 +37,7 @@ import org.spine3.server.entity.Version;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.SlowTest;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.testdata.TestStandFactory;
 
@@ -182,6 +184,7 @@ public class StandFunnelShould {
         checkUpdatesDelivery(false, getSeveralRepositoryDispatchCalls());
     }
 
+    @Category(SlowTest.class)   // 10000 ms average run time.
     @Test
     public void deliver_updates_from_several_repositories_in_multiple_threads() {
         checkUpdatesDelivery(true, getSeveralRepositoryDispatchCalls());
@@ -268,6 +271,7 @@ public class StandFunnelShould {
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
+    @Category(SlowTest.class)   // 6000 ms average run time.
     @Test
     public void deliver_updates_through_several_threads() throws InterruptedException {
         final int threadsCount = Given.THREADS_COUNT_IN_POOL_EXECUTOR;

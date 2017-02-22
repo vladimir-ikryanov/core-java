@@ -25,6 +25,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.spine3.test.SlowTest;
 
 import java.util.Iterator;
 import java.util.List;
@@ -68,6 +70,7 @@ public class PackingIteratorShould {
         assertFalse(packer.hasNext());
     }
 
+    @Category(SlowTest.class)   // 500 ms average run time.
     @Test
     public void implement_next() throws Exception {
         while (packer.hasNext()) {

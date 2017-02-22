@@ -32,6 +32,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.spine3.base.Queries;
@@ -52,6 +53,7 @@ import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.SlowTest;
 import org.spine3.test.commandservice.customer.Customer;
 import org.spine3.test.commandservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
@@ -568,6 +570,7 @@ public class StandShould {
         requestSampleCustomer(new int[]{}, getDuplicateCostumerStreamObserver());
     }
 
+    @Category(SlowTest.class)   // 500 ms average run time.
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void select_entity_singleton_by_id_and_apply_field_masks() {
