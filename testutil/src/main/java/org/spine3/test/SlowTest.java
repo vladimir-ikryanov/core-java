@@ -26,5 +26,6 @@ package org.spine3.test;
  *
  * @author Alex Tymchenko
  */
+@SuppressWarnings("InterfaceNeverImplemented")  // a marker interface for the JUnit category.
 public interface SlowTest {
 }
