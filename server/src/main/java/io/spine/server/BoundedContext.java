@@ -136,9 +136,17 @@ public final class BoundedContext
         return result;
     }
 
-
+    /**
+     * Performs an post-construction initialization of this {@code BoundedContext}.
+     *
+     * <p>This method should only be called after the instance construction. Do not call
+     */
     private void init() {
         stand.onCreated(this);
+        if (tenantIndex instanceof Repository) {
+            final Repository<?, ?> tenantRepository = (Repository<?, ?>) tenantIndex;
+            register(tenantRepository);
+        }
     }
 
     /**
