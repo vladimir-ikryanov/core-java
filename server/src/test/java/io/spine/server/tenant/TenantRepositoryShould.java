@@ -20,7 +20,6 @@
 
 package io.spine.server.tenant;
 
-import com.google.protobuf.Timestamp;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import org.junit.Before;
@@ -80,6 +79,6 @@ public class TenantRepositoryShould {
 
 
     private static class TenantRepositoryImpl
-            extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {
+            extends TenantRepository<Tenant, DefaultTenantRepository.Entity> {
     }
 }

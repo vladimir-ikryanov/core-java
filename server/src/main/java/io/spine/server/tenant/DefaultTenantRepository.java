@@ -29,18 +29,30 @@ import io.spine.time.Time;
  * of tenant ID registration.
  *
  * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-final class DefaultTenantRepository
-      extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {
+final class DefaultTenantRepository extends TenantRepository<Tenant,
+                                                             DefaultTenantRepository.Entity> {
 
-    public static class Entity extends TenantRepository.Entity<Timestamp> {
+    /**
+     * The default tenant entity.
+     *
+     * <p>Represents a timestamp of when was the tenant added.
+     */
+    public static class Entity extends TenantRepository.Entity<Tenant> {
+
         protected Entity(TenantId id) {
             super(id);
         }
 
         @Override
-        public Timestamp getDefaultState() {
-            return Time.getCurrentTime();
+        public Tenant getDefaultState() {
+            final Timestamp timestamp = Time.getCurrentTime();
+            final Tenant defaultState = Tenant.newBuilder()
+                                              .setId(getId())
+                                              .setTimestamp(timestamp)
+                                              .build();
+            return defaultState;
         }
     }
 }
