@@ -90,6 +90,8 @@ public interface TenantIndex extends AutoCloseable {
          * factory. Therefore, it is safe to pass both single-tenant and multi-tenant storage
          * factories to this method as long as the passed factory implements
          * {@link StorageFactory#toSingleTenant()}.
+         *
+         * @param storageFactory the factory for the underlying storage of the {@code TenantIndex}
          */
         public static TenantIndex createDefault(StorageFactory storageFactory) {
             checkNotNull(storageFactory);
