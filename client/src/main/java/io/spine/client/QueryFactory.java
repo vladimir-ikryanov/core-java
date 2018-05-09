@@ -22,7 +22,7 @@ package io.spine.client;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.ActorContext;
 
 import javax.annotation.Nullable;
@@ -31,7 +31,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.Queries.queryBuilderFor;
 import static java.lang.String.format;
 

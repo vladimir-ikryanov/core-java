@@ -21,7 +21,8 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import io.spine.Identifier;
+import io.spine.base.Errors;
+import io.spine.base.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.ThrowableMessage;
@@ -38,6 +39,7 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Deque;
@@ -46,11 +48,12 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.base.Errors.fromThrowable;
 import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
+import static io.spine.grpc.MetadataConverter.toError;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
-import static io.spine.util.Exceptions.toError;
 import static java.lang.String.format;
 
 /**
@@ -213,7 +216,7 @@ public class CommandBus extends Bus<Command,
                 rejectionBus().post(rejection);
                 result = reject(envelope.getId(), rejection);
             } else {
-                final Error error = toError(cause);
+                final Error error = fromThrowable(cause);
                 result = reject(envelope.getId(), error);
             }
         }
@@ -257,11 +260,11 @@ public class CommandBus extends Bus<Command,
     }
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
-        final String idStr = Identifier.toString(commandEnvelope.getId());
+        final String idString = Identifier.toString(commandEnvelope.getId());
         final String msg = format("No dispatcher found for the command (class: %s id: %s).",
                                   commandEnvelope.getMessageClass()
-                                                 .getClassName(),
-                                  idStr);
+                                                 .value(),
+                                  idString);
         throw new IllegalStateException(msg);
     }
 
